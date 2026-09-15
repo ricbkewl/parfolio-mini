@@ -110,3 +110,25 @@ input,select{background:linear-gradient(145deg,rgba(255,255,255,.085),rgba(1,31,
 @media(max-width:900px){.hero{padding:42px 34px;grid-template-columns:minmax(0,1fr) minmax(290px,.8fr)}.hero-copy:before{display:none}.glass-note{display:none}.phone-shell{width:270px;height:505px}.workspace-grid{grid-template-columns:1fr}.workspace-grid .records-section{min-height:0}}
 @media(max-width:690px){.shell{padding-left:14px;padding-right:14px}.brand-mark{width:56px;height:56px}.hero{grid-template-columns:1fr;min-height:0;padding:30px 24px}.hero h1{font-size:clamp(3rem,12vw,4.2rem);max-width:10ch;margin:24px 0}.hero-visual{min-height:450px}.visual-orbit{display:none}.phone-shell{width:245px;height:456px}.phone-status{display:none}.steps-panel{padding:22px}.golf-banner{min-height:230px}}
 @media(max-width:450px){.shell{padding-left:10px;padding-right:10px}.hero{padding:24px 20px}.hero h1{font-size:2.9rem}.hero-visual{min-height:430px}.phone-shell{width:228px;height:430px}.steps-panel{padding:19px}}
+
+
+/* Wallet-signed golf credential */
+.records-section{position:relative;overflow:hidden}
+.records-section:before{content:"";position:absolute;right:-110px;top:-130px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(226,192,88,.13),transparent 70%);pointer-events:none}
+.record-card{position:relative;display:block;padding:20px;border-color:rgba(238,211,128,.25);border-radius:24px;background:linear-gradient(140deg,rgba(43,108,78,.58),rgba(6,43,31,.78) 44%,rgba(2,27,20,.91));box-shadow:inset 0 1px rgba(255,255,255,.2),0 18px 30px rgba(0,0,0,.22)}
+.credential-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.credential-top h3{font-size:1.12rem;line-height:1.2;margin:8px 0 7px}.credential-top .record-meta{color:#b6cabe}
+.credential-status{white-space:nowrap;padding:7px 10px;border-radius:999px;color:#e5d087;background:rgba(218,183,75,.12);border:1px solid rgba(230,197,95,.3);font-size:.64rem;font-weight:900;box-shadow:inset 0 1px rgba(255,255,255,.11)}
+.credential-score{display:flex;align-items:center;gap:17px;margin:22px 0;padding:17px;border:1px solid rgba(255,255,255,.13);border-radius:21px;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(2,25,17,.18));box-shadow:inset 0 1px rgba(255,255,255,.08)}
+.credential-medallion{width:126px;height:126px;flex:0 0 auto;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:7px solid rgba(222,190,93,.45);background:radial-gradient(circle at 24% 18%,#fffdf1,#e9dfb9 63%,#a99a64);color:#103927;box-shadow:0 13px 23px rgba(0,0,0,.32),inset 7px 8px 14px rgba(255,255,255,.56),inset -7px -9px 13px rgba(82,67,29,.18)}
+.credential-medallion span,.credential-medallion small{font-size:.48rem;letter-spacing:.07em;font-weight:900;text-align:center}.credential-medallion strong{font-size:3rem;line-height:1;letter-spacing:-.06em}
+.credential-stats{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.credential-stats span{text-align:center}.credential-stats b,.credential-stats small{display:block}.credential-stats b{font-size:1.1rem;color:#fff6df}.credential-stats small{font-size:.52rem;letter-spacing:.1em;color:#a8c0af;margin-top:5px}
+.credential-wallet{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid rgba(255,255,255,.08);font-size:.73rem;color:#adc3b4}.credential-wallet code{font-size:.7rem;color:#f2daa1;overflow-wrap:anywhere}
+.record-card .signature-row{padding:11px 0;gap:8px;font-size:.66rem}.record-card .signature-row span{color:#b5cbb9}.record-card .signature-row code{overflow-wrap:anywhere}
+.share-record{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 15px;margin-top:12px;border:1px solid rgba(234,206,115,.35);border-radius:13px;background:linear-gradient(125deg,rgba(230,193,91,.19),rgba(8,71,48,.46));color:#f1dd9d;font-weight:800;font-size:.77rem;box-shadow:inset 0 1px rgba(255,255,255,.13)}
+.share-record:hover{filter:brightness(1.1)}.share-record:focus-visible{outline:2px solid #f3d77f;outline-offset:3px}.share-record span{font-size:1rem}
+.share-feedback{min-height:1em;margin:7px 0 0;color:#a8e4bc;font-size:.7rem}
+@media(max-width:450px){.record-card{padding:17px}.credential-score{gap:11px;padding:12px}.credential-medallion{width:105px;height:105px;border-width:5px}.credential-medallion strong{font-size:2.5rem}.credential-stats b{font-size:.95rem}.credential-stats small{font-size:.46rem}.credential-status{font-size:.56rem}.credential-wallet{flex-wrap:wrap}}
+
+.proof-details{margin-top:12px;border-top:1px solid rgba(255,255,255,.09);padding-top:10px;color:#b6cbb9;font-size:.7rem}.proof-details summary{cursor:pointer;font-weight:800;color:#e6d399}.proof-details pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;font-size:.63rem;color:#a9bdb0;padding:12px;border-radius:12px;background:rgba(0,0,0,.22)}

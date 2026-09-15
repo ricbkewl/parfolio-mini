@@ -39,7 +39,7 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;')
 }
 
-function roundMessage(round) {
+function roundMessage(round, wallet) {
   return [
     'PARFOLIO MINI WALLET-SIGNED ROUND',
     `course=${round.course}`,
@@ -49,25 +49,51 @@ function roundMessage(round) {
     `par=${round.par}`,
     `birdies=${round.birdies}`,
     `longestDriveYards=${round.longestDrive || 'n/a'}`,
-    `wallet=${state.account}`,
+    `wallet=${wallet}`,
     `createdAt=${round.createdAt}`,
+  ].join('\n')
+}
+
+function shareableRecord(item) {
+  return [
+    'ParFolio Mini · Player-entered, wallet-signed round',
+    item.message || roundMessage(item, item.wallet),
+    `publicKey=${item.publicKey || 'not available'}`,
+    `signature=${item.signature}`,
+    'The wallet signature does not independently confirm the golf score.',
   ].join('\n')
 }
 
 function render() {
   const connected = Boolean(state.account)
-  const records = state.verifiedRounds.map((item) => `
+  const records = state.verifiedRounds.map((item, index) => `
     <article class="record-card">
-      <div>
-        <p class="eyebrow">Wallet-signed round</p>
-        <h3>${escapeHtml(item.course)}</h3>
-        <p class="record-meta">${escapeHtml(item.date)} · ${item.holes} holes · ${item.score} strokes</p>
+      <div class="credential-top">
+        <div>
+          <p class="eyebrow">Wallet-signed golf record</p>
+          <h3>${escapeHtml(item.course)}</h3>
+          <p class="record-meta">${escapeHtml(item.date)} · ${escapeHtml(item.holes)} holes</p>
+        </div>
+        <span class="credential-status">✓ Signed</span>
       </div>
-      <div class="record-score">${item.score - item.par > 0 ? '+' : ''}${item.score - item.par}</div>
+      <div class="credential-score">
+        <div class="credential-medallion"><span>PLAYER ENTERED</span><strong>${escapeHtml(item.score)}</strong><small>${item.score - item.par > 0 ? '+' : ''}${item.score - item.par} TO PAR</small></div>
+        <div class="credential-stats">
+          <span><b>${escapeHtml(item.holes)}</b><small>HOLES</small></span>
+          <span><b>${escapeHtml(item.par)}</b><small>PAR</small></span>
+          <span><b>${escapeHtml(item.birdies)}</b><small>BIRDIES</small></span>
+        </div>
+      </div>
+      <div class="credential-wallet">
+        <span>Signing wallet</span><code title="${escapeHtml(item.wallet)}">${escapeHtml(shortAddress(item.wallet))}</code>
+      </div>
       <div class="signature-row">
-        <span>✓ Wallet signed · Player entered</span>
-        <code>${escapeHtml(item.signature.slice(0, 14))}…</code>
+        <span>Signature captured · Score self-reported</span>
+        <code title="${escapeHtml(item.signature)}">${escapeHtml(item.signature.slice(0, 14))}…</code>
       </div>
+      <button class="share-record" type="button" data-share-round="${index}">Share signed record <span aria-hidden="true">↗</span></button>
+      <p class="share-feedback" role="status" aria-live="polite"></p>
+      <details class="proof-details"><summary>View the signed record</summary><pre>${escapeHtml(shareableRecord(item))}</pre></details>
     </article>
   `).join('')
 
@@ -89,8 +115,8 @@ function render() {
       <section class="hero glass-surface">
         <div class="hero-copy">
           <span class="nimiq-badge"><span class="badge-dot"></span>Powered by Nimiq Pay</span>
-          <h1>Record your golf round.<span> Sign the result.</span></h1>
-          <p class="hero-lede">Connect your Nimiq wallet, record your round, and sign the result. Your wallet signs the details you enter. A signature identifies the signing wallet; it does not independently confirm the score.</p>
+          <h1>Verify your golf round.<span> Own the result.</span></h1>
+          <p class="hero-lede">Connect your Nimiq wallet, record your round, and sign the result. Your wallet signs the round details you enter and gives you a record you can share. The signature confirms the signing wallet, not the golf score.</p>
           <button id="connectWallet" class="primary hero-cta" type="button">${connected ? 'Wallet connected ✓' : 'Connect wallet'}<span aria-hidden="true">→</span></button>
           <p id="walletMessage" class="helper">${connected ? `Connected as ${escapeHtml(state.account)}` : 'Open inside Nimiq Pay to connect securely. Your private keys never leave the wallet.'}</p>
 
@@ -113,7 +139,7 @@ function render() {
                 <img src="/parfolio-mini-logo-v2.png" alt="" aria-hidden="true" />
                 <div><strong>ParFolio Mini</strong><small>Your round. Signed.</small></div>
               </div>
-              <span class="round-verified"><span></span>Wallet signed</span>
+              <span class="round-verified"><span></span>Wallet-signed record</span>
               <div class="score-orbit compact">
                 <div class="orbit-ring"></div>
                 <div class="score-ball">
@@ -212,8 +238,8 @@ function render() {
       <section class="records-section">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Saved on this device</p>
-            <h2>Wallet-signed round history</h2>
+            <p class="eyebrow">Saved on this device · Shareable proof</p>
+            <h2>Your signed golf records</h2>
           </div>
           <span class="count">${state.verifiedRounds.length} signed</span>
         </div>
@@ -307,12 +333,14 @@ async function verifyRound(form) {
 
   try {
     const provider = await getProvider()
-    const signed = await provider.sign(roundMessage(round))
+    const messageToSign = roundMessage(round, state.account)
+    const signed = await provider.sign(messageToSign)
     state.verifiedRounds.unshift({
       ...round,
       wallet: state.account,
       publicKey: signed.publicKey,
       signature: signed.signature,
+      message: messageToSign,
       blockNumber: state.blockNumber,
     })
     saveRounds()
@@ -325,8 +353,27 @@ async function verifyRound(form) {
   }
 }
 
+async function shareRecord(index, button) {
+  const item = state.verifiedRounds[index]
+  if (!item) return
+  const feedback = button.parentElement.querySelector('.share-feedback')
+  const text = shareableRecord(item)
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: `ParFolio Mini · ${item.course}`, text })
+      feedback.textContent = 'Record shared.'
+    } else {
+      await navigator.clipboard.writeText(text)
+      feedback.textContent = 'Signed record copied. You can paste it into a message.'
+    }
+  } catch (error) {
+    if (error?.name !== 'AbortError') feedback.textContent = 'Sharing was unavailable. Please try again.'
+  }
+}
+
 function bindEvents() {
   document.querySelector('#connectWallet')?.addEventListener('click', connectWallet)
+  document.querySelectorAll('[data-share-round]').forEach((button) => button.addEventListener('click', () => shareRecord(Number(button.dataset.shareRound), button)))
   document.querySelector('#roundForm')?.addEventListener('submit', (event) => {
     event.preventDefault()
     verifyRound(event.currentTarget)
