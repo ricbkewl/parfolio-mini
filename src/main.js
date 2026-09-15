@@ -74,39 +74,90 @@ function render() {
   app.innerHTML = `
     <main class="shell">
       <header class="topbar">
-        <div class="brand-mark" aria-hidden="true">PF</div>
-        <div>
-          <p class="brand">ParFolio Mini</p>
-          <p class="tagline">Your golf game. Verified. Rewarded.</p>
+        <div class="brand-lockup">
+          <img class="brand-mark" src="/parfolio-mini-mark.svg" alt="ParFolio Mini logo" />
+          <div>
+            <p class="brand">ParFolio Mini</p>
+            <p class="tagline">Your golf game. Verified. Rewarded.</p>
+          </div>
         </div>
         <div class="wallet-chip ${connected ? 'connected' : ''}">
           <span class="status-dot"></span>${escapeHtml(shortAddress(state.account))}
         </div>
       </header>
 
-      <section class="hero">
+      <section class="hero glass-surface">
         <div class="hero-copy">
-          <span class="nimiq-badge">Powered by Nimiq Pay</span>
-          <h1>Turn a golf round into a wallet-verified achievement.</h1>
-          <p>Connect your Nimiq wallet, record your round, and sign the result. ParFolio Mini creates a portable golf record that belongs to the player.</p>
-          <button id="connectWallet" class="primary" type="button">${connected ? 'Wallet connected' : 'Connect Nimiq Wallet'}</button>
+          <span class="nimiq-badge"><span class="badge-dot"></span>Powered by Nimiq Pay</span>
+          <h1>Verify your golf round.<span> Own the result.</span></h1>
+          <p class="hero-lede">Connect your Nimiq wallet, record your round, and sign the result. ParFolio Mini creates portable, wallet-signed golf proof that belongs to you.</p>
+          <button id="connectWallet" class="primary hero-cta" type="button">${connected ? 'Wallet connected ✓' : 'Connect wallet'}<span aria-hidden="true">→</span></button>
           <p id="walletMessage" class="helper">${connected ? `Connected as ${escapeHtml(state.account)}` : 'Open inside Nimiq Pay to connect securely. Your private keys never leave the wallet.'}</p>
+
+          <div class="trust-row" aria-label="ParFolio Mini benefits">
+            <span><i class="trust-icon">⌾</i><b>Secure & private</b></span>
+            <span><i class="trust-icon">◇</i><b>Player owned</b></span>
+            <span><i class="trust-icon">✓</i><b>Wallet signed</b></span>
+          </div>
         </div>
 
-        <div class="score-orbit" aria-label="Example verified golf score">
-          <div class="orbit-ring"></div>
-          <div class="score-ball">
-            <span>VERIFIED</span>
-            <strong>72</strong>
-            <small>EVEN PAR</small>
+        <div class="hero-visual" aria-label="Example wallet-verified golf round">
+          <div class="hero-glow" aria-hidden="true"></div>
+          <div class="phone-shell">
+            <div class="phone-edge"></div>
+            <div class="phone-screen">
+              <div class="phone-brand">
+                <img src="/parfolio-mini-mark.svg" alt="" aria-hidden="true" />
+                <div><strong>ParFolio Mini</strong><small>Your game. Verified.</small></div>
+              </div>
+              <span class="round-verified"><span></span>Round verified</span>
+              <div class="score-orbit compact">
+                <div class="orbit-ring"></div>
+                <div class="score-ball">
+                  <span>VERIFIED</span>
+                  <strong>72</strong>
+                  <small>EVEN PAR</small>
+                </div>
+              </div>
+              <div class="phone-stats">
+                <span><b>18</b><small>HOLES</small></span>
+                <span><b>72</b><small>SCORE</small></span>
+                <span><b>+0</b><small>TO PAR</small></span>
+              </div>
+              <p class="phone-quote">“A signed record of your best golf.”</p>
+            </div>
           </div>
+          <div class="golf-ball-art" aria-hidden="true"><span>PF</span></div>
         </div>
       </section>
 
-      <section class="steps" aria-label="How ParFolio Mini works">
-        <div><strong>1</strong><span>Connect wallet</span></div>
-        <div><strong>2</strong><span>Record round</span></div>
-        <div><strong>3</strong><span>Sign result</span></div>
+      <section class="steps-panel glass-surface" aria-label="How ParFolio Mini works">
+        <p class="steps-kicker">Get started in three steps</p>
+        <div class="steps">
+          <article class="step-card">
+            <div class="step-top"><strong>1</strong><span class="step-icon">▣</span></div>
+            <h3>Connect wallet</h3>
+            <p>Link your Nimiq wallet securely in seconds.</p>
+          </article>
+          <article class="step-card">
+            <div class="step-top"><strong>2</strong><span class="step-icon">≡</span></div>
+            <h3>Record round</h3>
+            <p>Enter the round details you want to verify.</p>
+          </article>
+          <article class="step-card">
+            <div class="step-top"><strong>3</strong><span class="step-icon">✓</span></div>
+            <h3>Sign result</h3>
+            <p>Create player-owned proof with your wallet signature.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="golf-banner" aria-label="ParFolio Mini golf identity">
+        <div>
+          <p class="banner-title">A better game<br />goes further.</p>
+          <p class="banner-kicker">Real rounds. Real ownership.</p>
+        </div>
+        <div class="banner-mantra"><span>⚑</span><b>PLAY</b><b>VERIFY</b><b>BELONG</b></div>
       </section>
 
       <section class="panel" id="verifyRound">
@@ -209,7 +260,7 @@ async function connectWallet() {
     render()
   } catch (error) {
     button.disabled = false
-    button.textContent = 'Connect Nimiq Wallet'
+    button.textContent = 'Connect wallet'
     message.textContent = error?.message || 'Wallet connection failed. Please try again.'
   }
 }
