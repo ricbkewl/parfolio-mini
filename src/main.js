@@ -117,8 +117,8 @@ function render() {
           <span class="nimiq-badge"><span class="badge-dot"></span>Powered by Nimiq Pay</span>
           <h1>Verify your golf round.<span> Own the result.</span></h1>
           <p class="hero-lede">Connect your Nimiq wallet, record your round, and sign the result. Your wallet signs the round details you enter and gives you a record you can share. The signature confirms the signing wallet, not the golf score.</p>
-          <button id="connectWallet" class="primary hero-cta" type="button">${connected ? 'Wallet connected ✓' : window.nimiqPay ? 'Connect wallet' : 'Open in Nimiq Pay'}<span aria-hidden="true">→</span></button>
-          <p id="walletMessage" class="helper" role="status" aria-live="polite">${connected ? `Connected as ${escapeHtml(state.account)}` : window.nimiqPay ? 'Tap Connect wallet and approve the Nimiq Pay account prompt. Your private keys never leave the wallet.' : 'Wallet connection works inside Nimiq Pay on your phone. Tap the button to open Mini there.'}</p>
+          <button id="connectWallet" class="primary hero-cta" type="button">${connected ? 'Record your round' : window.nimiqPay ? 'Connect wallet' : 'How to open in Nimiq Pay'}<span aria-hidden="true">→</span></button>
+          <p id="walletMessage" class="helper" role="status" aria-live="polite">${connected ? `Connected as ${escapeHtml(state.account)}. Tap Record your round to enter your score.` : window.nimiqPay ? 'Tap Connect wallet and approve the Nimiq Pay account prompt. Your private keys never leave the wallet.' : 'On your phone, open Nimiq Pay → Mini Apps → Custom URL and enter parfolio-mini.vercel.app to connect your wallet.'}</p>
 
           <div class="trust-row" aria-label="ParFolio Mini benefits">
             <span><i class="trust-icon">⌾</i><b>Secure & private</b></span>
@@ -266,8 +266,6 @@ function render() {
   bindEvents()
 }
 
-const nimiqPayLink = 'https://nimpay.app/miniapps/open/parfolio-mini.vercel.app'
-
 function withTimeout(promise, milliseconds, timeoutMessage) {
   let timer
   const timeout = new Promise((_, reject) => {
@@ -290,12 +288,11 @@ async function connectWallet() {
   const button = document.querySelector('#connectWallet')
   const message = document.querySelector('#walletMessage')
   if (!window.nimiqPay) {
-    message.textContent = 'Opening ParFolio Mini inside Nimiq Pay. Use a phone with Nimiq Pay installed.'
-    window.location.assign(nimiqPayLink)
+    message.textContent = 'Open Nimiq Pay on your phone → Mini Apps → Custom URL → enter https://parfolio-mini.vercel.app. The directory link is unavailable until the app is listed.'
     return
   }
   if (state.account) {
-    message.textContent = `Connected as ${state.account}`
+    document.querySelector('#verifyRound')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     return
   }
 
