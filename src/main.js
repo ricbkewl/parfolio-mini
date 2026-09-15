@@ -103,9 +103,12 @@ function render() {
 
         <div class="hero-visual" aria-label="Example wallet-signed, player-entered golf round">
           <div class="hero-glow" aria-hidden="true"></div>
+          <div class="visual-orbit orbit-one" aria-hidden="true"></div>
+          <div class="visual-orbit orbit-two" aria-hidden="true"></div>
           <div class="phone-shell">
             <div class="phone-edge"></div>
             <div class="phone-screen">
+              <div class="phone-status"><span>PARFOLIO MINI</span><span>✦ DEMO ROUND</span></div>
               <div class="phone-brand">
                 <img src="/parfolio-mini-mark.svg" alt="" aria-hidden="true" />
                 <div><strong>ParFolio Mini</strong><small>Your round. Signed.</small></div>
@@ -127,6 +130,8 @@ function render() {
               <p class="phone-quote">“A player-entered round, signed by a wallet.”</p>
             </div>
           </div>
+          <div class="glass-note glass-note-top" aria-hidden="true"><span class="note-icon">✦</span><span><b>Round details</b><small>Entered by the player</small></span></div>
+          <div class="glass-note glass-note-bottom" aria-hidden="true"><span class="note-icon">✓</span><span><b>Wallet signature</b><small>Attached to this record</small></span></div>
           <div class="golf-ball-art" aria-hidden="true"><span>PF</span></div>
         </div>
       </section>
@@ -160,6 +165,7 @@ function render() {
         <div class="banner-mantra"><span>⚑</span><b>PLAY</b><b>SIGN</b><b>BELONG</b></div>
       </section>
 
+      <div class="workspace-grid">
       <section class="panel" id="verifyRound">
         <div class="section-heading">
           <div>
@@ -213,6 +219,7 @@ function render() {
         </div>
         <div class="records">${records || '<div class="empty">Your player-entered, wallet-signed rounds will appear here.</div>'}</div>
       </section>
+      </div>
 
       <section class="coming-soon">
         <div>
