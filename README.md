@@ -1,8 +1,8 @@
 # ParFolio Mini
 
-**Your golf game. Verified. Rewarded.**
+**Your golf game. Recorded. Signed.**
 
-ParFolio Mini is a focused Nimiq Pay edition of ParFolio built for the Global Mini Apps Building Competition. It lets golfers connect a Nimiq wallet, record a golf round, and cryptographically sign the result to create a wallet-verified golf achievement.
+ParFolio Mini is a focused Nimiq Pay edition of ParFolio built for the Global Mini Apps Building Competition. It lets golfers connect a Nimiq wallet, record a golf round, and cryptographically sign the player-entered round details to create a shareable record linked to the signing wallet. A wallet signature does not independently confirm the score.
 
 ## Competition concept
 
@@ -11,12 +11,12 @@ The core flow is intentionally simple:
 1. Connect a Nimiq wallet inside Nimiq Pay.
 2. Record a round: course, date, score, par, birdies, and optional longest drive.
 3. Approve a wallet signature for the round summary.
-4. Save the verified round to the player's local golf history.
+4. Save the wallet-signed round on the current device and share the signed message, public key, and signature.
 5. Next: enter skill-based golf challenges with transparent NIM-funded rewards.
 
 ## Why Nimiq belongs in the product
 
-Nimiq Pay is not decorative in ParFolio Mini. The wallet provides player-controlled identity and cryptographic verification of golf results. The next competition feature extends that same identity into measurable skill challenges and NIM rewards.
+Nimiq Pay is not decorative in ParFolio Mini. The wallet provides player-controlled identity and a cryptographic signature on the player's entered round details. Mini does not verify the golf score against a course or another player. The next competition feature extends that same identity into measurable skill challenges and NIM rewards.
 
 ## Technology
 
@@ -46,10 +46,11 @@ ParFolio Mini never receives or stores wallet private keys. Sensitive wallet act
 - [x] MIT licensed
 - [x] Nimiq Mini App SDK integration
 - [x] Wallet connection
-- [x] Wallet-signed verified rounds
+- [x] Wallet-signed player-entered rounds and shareable signed records
 - [ ] Skill challenge flow
 - [ ] NIM reward/payment flow
-- [ ] Deployment and Nimiq Pay device testing
+- [x] Vercel production deployment
+- [ ] Nimiq Pay wallet and signature testing on real devices
 - [ ] 25+ real-wallet user test campaign
 - [ ] Submission video and final 250-word description
 
