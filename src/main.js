@@ -117,8 +117,8 @@ function render() {
           <span class="nimiq-badge"><span class="badge-dot"></span>Powered by Nimiq Pay</span>
           <h1>Verify your golf round.<span> Own the result.</span></h1>
           <p class="hero-lede">Connect your Nimiq wallet, record your round, and sign the result. Your wallet signs the round details you enter and gives you a record you can share. The signature confirms the signing wallet, not the golf score.</p>
-          <button id="connectWallet" class="primary hero-cta" type="button">${connected ? 'Wallet connected ✓' : 'Connect wallet'}<span aria-hidden="true">→</span></button>
-          <p id="walletMessage" class="helper">${connected ? `Connected as ${escapeHtml(state.account)}` : 'Open inside Nimiq Pay to connect securely. Your private keys never leave the wallet.'}</p>
+          <button id="connectWallet" class="primary hero-cta" type="button">${connected ? 'Wallet connected ✓' : window.nimiqPay ? 'Connect wallet' : 'Open in Nimiq Pay'}<span aria-hidden="true">→</span></button>
+          <p id="walletMessage" class="helper" role="status" aria-live="polite">${connected ? `Connected as ${escapeHtml(state.account)}` : window.nimiqPay ? 'Tap Connect wallet and approve the Nimiq Pay account prompt. Your private keys never leave the wallet.' : 'Wallet connection works inside Nimiq Pay on your phone. Tap the button to open Mini there.'}</p>
 
           <div class="trust-row" aria-label="ParFolio Mini benefits">
             <span><i class="trust-icon">⌾</i><b>Secure & private</b></span>
@@ -266,35 +266,71 @@ function render() {
   bindEvents()
 }
 
+const nimiqPayLink = 'https://nimpay.app/miniapps/open/parfolio-mini.vercel.app'
+
+function withTimeout(promise, milliseconds, timeoutMessage) {
+  let timer
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(timeoutMessage)), milliseconds)
+  })
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer))
+}
+
 async function getProvider() {
   if (state.provider) return state.provider
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Nimiq Pay provider not detected. Open ParFolio Mini inside Nimiq Pay.')), 5000))
-  state.provider = await Promise.race([init(), timeout])
+  state.provider = await withTimeout(
+    init(),
+    8000,
+    'Nimiq Pay did not provide a wallet connection. Close Mini and open it again inside Nimiq Pay.',
+  )
   return state.provider
 }
 
 async function connectWallet() {
   const button = document.querySelector('#connectWallet')
   const message = document.querySelector('#walletMessage')
+  if (!window.nimiqPay) {
+    message.textContent = 'Opening ParFolio Mini inside Nimiq Pay. Use a phone with Nimiq Pay installed.'
+    window.location.assign(nimiqPayLink)
+    return
+  }
+  if (state.account) {
+    message.textContent = `Connected as ${state.account}`
+    return
+  }
+
   button.disabled = true
-  button.textContent = 'Connecting…'
-  message.textContent = 'Waiting for Nimiq Pay approval…'
+  button.textContent = 'Finding wallet…'
+  message.textContent = 'Checking the Nimiq Pay wallet connection…'
+  let approvalHint
   try {
     const provider = await getProvider()
-    const accounts = await provider.listAccounts()
-    if (!accounts?.length) throw new Error('No Nimiq account was returned.')
+    button.textContent = 'Awaiting approval…'
+    message.textContent = 'Approve the account request in Nimiq Pay.'
+    approvalHint = setTimeout(() => {
+      message.textContent = 'Still waiting for Nimiq Pay. If no account prompt appeared, close Mini and reopen it inside Nimiq Pay.'
+    }, 8000)
+    const accounts = await withTimeout(
+      provider.listAccounts(),
+      45000,
+      'No account response came from Nimiq Pay. Close Mini, reopen it, and tap Connect wallet again.',
+    )
+    if (!accounts?.length) throw new Error('Nimiq Pay returned no account. Please choose a wallet and try again.')
     state.account = accounts[0]
-    const [ready, height] = await Promise.all([
-      provider.isConsensusEstablished().catch(() => null),
-      provider.getBlockNumber().catch(() => null),
-    ])
-    state.networkReady = ready
-    state.blockNumber = height
     render()
+
+    // Network diagnostics are optional and must never hold the connected UI open.
+    if (typeof provider.getBlockNumber === 'function') {
+      Promise.resolve().then(() => provider.getBlockNumber()).then((height) => { state.blockNumber = height }).catch(() => {})
+    }
   } catch (error) {
     button.disabled = false
     button.textContent = 'Connect wallet'
-    message.textContent = error?.message || 'Wallet connection failed. Please try again.'
+    message.textContent = error?.name === 'PermissionDeniedError'
+      ? 'Account access was cancelled in Nimiq Pay. Tap Connect wallet to try again.'
+      : error?.message || 'Wallet connection failed. Close Mini and try again.'
+  } finally {
+    clearTimeout(approvalHint)
   }
 }
 
