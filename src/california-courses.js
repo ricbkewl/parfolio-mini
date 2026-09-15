@@ -11,6 +11,29 @@ export const californiaRegions = [
   { id: 'palm-springs', label: 'Palm Springs', lat: 33.8303, lon: -116.5453 },
 ]
 
+
+// A small built-in California starter list keeps course selection usable offline.
+// Coordinates are course-level waypoints, not tees, pins, or playable yardages.
+export const californiaStarterCourses = [
+  { name: 'Sierra Lakes Golf Club', lat: 34.14507, lon: -117.43930 },
+  { name: 'Oak Quarry Golf Club', lat: 34.02855, lon: -117.43058 },
+  { name: 'Rancho Park Golf Course', lat: 34.04510, lon: -118.41371 },
+  { name: 'Oak Creek Golf Club', lat: 33.67652, lon: -117.77080 },
+  { name: 'Torrey Pines Golf Course', lat: 32.90450, lon: -117.24540 },
+  { name: 'TPC Harding Park Golf Course', lat: 37.72181, lon: -122.49163 },
+  { name: 'Pebble Beach Golf Links', lat: 36.56552, lon: -121.93968 },
+  { name: 'Haggin Oaks Golf Complex', lat: 38.63176, lon: -121.40738 },
+  { name: 'Riverside Golf Course of Fresno', lat: 36.84390, lon: -119.90919 },
+  { name: 'Tahquitz Creek Golf Resort', lat: 33.80102, lon: -116.48462 },
+]
+
+export function starterCoursesNear(lat, lon) {
+  if (!californiaBounds(lat, lon)) return []
+  return californiaStarterCourses
+    .map((course) => ({ ...course, distance: distanceMiles(lat, lon, course.lat, course.lon), source: 'starter' }))
+    .filter((course) => course.distance <= 28)
+    .sort((a, b) => a.distance - b.distance)
+}
 export function californiaBounds(lat, lon) {
   return Number.isFinite(lat) && Number.isFinite(lon)
     && lat >= 32.5 && lat <= 42.1 && lon >= -124.6 && lon <= -114.1

@@ -1,6 +1,6 @@
 import { init } from '@nimiq/mini-app-sdk'
 import './styles.css'
-import { californiaRegions, californiaBounds, findCaliforniaCourses, mapUrl } from './california-courses.js'
+import { californiaRegions, californiaBounds, findCaliforniaCourses, mapUrl, starterCoursesNear } from './california-courses.js'
 
 const app = document.querySelector('#app')
 
@@ -215,7 +215,7 @@ function render() {
           </div>
           <p id="courseStatus" class="helper" role="status" aria-live="polite">Course search uses OpenStreetMap. You can always enter a course below.</p>
           <div id="courseResults" class="course-results"></div>
-          <small class="course-attribution">Course locations © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></small>
+          <small class="course-attribution">Live map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></small>
         </div>
 
         <form id="roundForm" class="round-form">
@@ -441,15 +441,23 @@ async function searchCoursesAt(lat, lon) {
   const status = document.querySelector('#courseStatus')
   const controls = document.querySelectorAll('#searchCourses, #nearbyCourses')
   controls.forEach((button) => { button.disabled = true })
-  status.textContent = 'Finding mapped California golf courses…'
+  showCourseResults(starterCoursesNear(lat, lon))
+  status.textContent = 'Built-in courses shown. Finding more mapped California golf courses…'
   try {
     const courses = await findCaliforniaCourses(lat, lon)
-    showCourseResults(courses)
-    status.textContent = courses.length
-      ? `Found ${courses.length} courses. Select one to add it to your round.`
+    const starter = starterCoursesNear(lat, lon)
+    const names = new Set(courses.map((course) => course.name.toLowerCase()))
+    const combined = [...courses, ...starter.filter((course) => !names.has(course.name.toLowerCase()))]
+    showCourseResults(combined)
+    status.textContent = combined.length
+      ? `Found ${combined.length} California courses. Select one to add it to your round.`
       : 'No courses were found here. Choose another region or enter one manually.'
   } catch (error) {
-    status.textContent = error?.message || 'Course search failed. You can enter a course manually.'
+    const starter = starterCoursesNear(lat, lon)
+    showCourseResults(starter)
+    status.textContent = starter.length
+      ? `Showing ${starter.length} built-in California courses; live search is unavailable. You can still select a course.`
+      : 'Live course search is unavailable here. Try another California region or enter a course manually.'
   } finally {
     controls.forEach((button) => { button.disabled = false })
   }
@@ -488,6 +496,15 @@ function bindEvents() {
     verifyRound(event.currentTarget)
   })
 
+  document.querySelector('#caRegion')?.addEventListener('change', (event) => {
+    const region = californiaRegions.find((item) => item.id === event.currentTarget.value)
+    if (!region) return
+    const starter = starterCoursesNear(region.lat, region.lon)
+    showCourseResults(starter)
+    document.querySelector('#courseStatus').textContent = starter.length
+      ? `Showing ${starter.length} built-in courses. Tap Search courses for more.`
+      : 'No built-in courses here. Tap Search courses or enter one manually.'
+  })
   document.querySelector('#searchCourses')?.addEventListener('click', () => searchCaliforniaRegion())
   document.querySelector('#nearbyCourses')?.addEventListener('click', searchNearbyCaliforniaCourses)
   document.querySelector('#courseResults')?.addEventListener('click', (event) => {
@@ -502,6 +519,9 @@ function bindEvents() {
     input.scrollIntoView({ behavior: 'smooth', block: 'center' })
   })
   document.querySelector('input[name="course"]')?.addEventListener('input', () => { state.selectedCourse = null })
+  const starterRegion = californiaRegions[0]
+  showCourseResults(starterCoursesNear(starterRegion.lat, starterRegion.lon))
+  document.querySelector('#courseStatus').textContent = 'Built-in California courses are ready. Search to find more mapped courses.'
 
   const dateInput = document.querySelector('input[name="date"]')
   if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10)
