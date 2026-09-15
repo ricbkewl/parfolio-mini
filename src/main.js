@@ -215,7 +215,7 @@ function render() {
           </div>
           <p id="courseStatus" class="helper" role="status" aria-live="polite">Course search uses OpenStreetMap. You can always enter a course below.</p>
           <div id="courseResults" class="course-results"></div>
-          <small class="course-attribution">Course locations © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></small>
+          <small class="course-attribution">Live map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></small>
         </div>
 
         <form id="roundForm" class="round-form">
