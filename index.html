@@ -4,17 +4,73 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#061c15" />
-    <meta name="description" content="ParFolio Mini — wallet-signed golf rounds powered by Nimiq Pay." />
+    <meta name="description" content="ParFolio Mini lets golfers play GPS-ready courses, track scores hole by hole, and save wallet-signed golf records with Nimiq." />
     <link rel="icon" type="image/png" href="/parfolio-mini-logo-v2.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/parfolio-mini.webmanifest" />
-    <title>ParFolio Mini</title>
+    <title>ParFolio Mini — Play. Score. Sign.</title>
   </head>
   <body>
+    <section class="competition-landing" aria-label="ParFolio Mini introduction">
+      <div class="landing-inner">
+        <nav class="landing-nav" aria-label="ParFolio Mini">
+          <div class="landing-brand">
+            <img src="/parfolio-mini-logo-v2.png" alt="ParFolio Mini" />
+            <div><strong>ParFolio Mini</strong><span>Competition Edition · Powered by Nimiq</span></div>
+          </div>
+          <button class="wallet-launch" type="button" data-connect-wallet>Connect Wallet</button>
+        </nav>
+
+        <div class="landing-hero">
+          <div class="hero-copy">
+            <p class="eyebrow">GPS golf + a wallet-signed record</p>
+            <h1>Play your round.<br />Save your score.<br /><span class="gold">Own your golf record.</span></h1>
+            <p class="hero-lede">Find a GPS-ready course, track your round hole by hole, then sign the finished result with your Nimiq wallet to create a shareable golf record you control.</p>
+            <div class="hero-actions">
+              <button class="start-round" type="button" data-start-round>Start a Round →</button>
+              <button class="how-button" type="button" data-how-it-works>How It Works</button>
+            </div>
+            <p class="hero-note">You can browse and play first. Your Nimiq wallet is used when you want to sign and save the completed round.</p>
+            <div class="quick-story" aria-label="What ParFolio Mini does">
+              <article><b>GPS-Ready Courses</b><span>Choose a supported California course with validated hole geometry.</span></article>
+              <article><b>Track Hole by Hole</b><span>Use the course view, yardage and simple scoring while you play.</span></article>
+              <article><b>Sign & Own</b><span>Finish the round and attach your Nimiq wallet signature to the record.</span></article>
+            </div>
+          </div>
+          <div class="hero-art">
+            <img id="competitionHeroImage" alt="ParFolio Mini showing GPS golf play, hole-by-hole scoring and a wallet-signed golf record" />
+          </div>
+        </div>
+
+        <section class="how-section" id="howItWorks" aria-labelledby="howTitle">
+          <div class="how-head">
+            <div><p class="eyebrow">Simple by design</p><h2 id="howTitle">One round. Three steps.</h2></div>
+            <p>ParFolio Mini keeps the competition experience focused: play a supported course, keep score, then save a wallet-signed result.</p>
+          </div>
+          <div class="steps-grid">
+            <article class="step"><span class="step-num">1</span><h3>Choose a GPS-ready course</h3><p>Search the validated California course catalog and start your round.</p></article>
+            <article class="step"><span class="step-num">2</span><h3>Track your round</h3><p>Move hole to hole with mapped golf-course geometry, yardage and score controls.</p></article>
+            <article class="step"><span class="step-num">3</span><h3>Sign and save</h3><p>When the round is complete, sign the result with Nimiq and keep a shareable record on your device.</p></article>
+          </div>
+        </section>
+
+        <div class="difference">
+          <article><p class="eyebrow">Why it matters</p><h3>More than a scorecard</h3><p>Most golf apps stop after recording a number. ParFolio Mini connects your completed round to your wallet so the record can stay with you and be shared.</p></article>
+          <article class="signature-card"><p class="eyebrow">Clear trust model</p><h3><strong>Your wallet signs what you entered.</strong></h3><p>The signature proves which wallet signed the round details. It does not independently certify that the golf score itself is accurate.</p></article>
+        </div>
+
+        <div class="final-cta">
+          <div><h2>Ready to play?</h2><p>Choose a GPS-ready course and start keeping your round.</p></div>
+          <button type="button" data-start-round>Find a Course →</button>
+        </div>
+      </div>
+    </section>
+
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
     <script type="module" src="/src/parfolio-catalog-search.js"></script>
     <script type="module" src="/src/round-play.js"></script>
     <script type="module" src="/src/round-play-ui.js"></script>
+    <script type="module" src="/src/landing.js"></script>
   </body>
 </html>
