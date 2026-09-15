@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 560" role="img" aria-labelledby="title desc">
+  <title id="title">ParFolio Mini golf horizon</title>
+  <desc id="desc">Dark emerald golf course landscape with gold sunrise and flag</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c3e2d"/>
+      <stop offset=".54" stop-color="#09271e"/>
+      <stop offset="1" stop-color="#071710"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="78%" cy="24%" r="36%">
+      <stop offset="0" stop-color="#f5d77d" stop-opacity=".72"/>
+      <stop offset=".24" stop-color="#d5a949" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#d5a949" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fairway" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#226647"/>
+      <stop offset="1" stop-color="#0a3828"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff0af"/>
+      <stop offset=".5" stop-color="#d5ae4b"/>
+      <stop offset="1" stop-color="#9d6d19"/>
+    </linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+  <rect width="1400" height="560" fill="url(#sky)"/>
+  <rect width="1400" height="560" fill="url(#sun)"/>
+  <ellipse cx="1110" cy="142" rx="230" ry="92" fill="#f6d97d" opacity=".08" filter="url(#blur)"/>
+  <path d="M0 312C115 270 204 259 296 284c90 25 143 41 226 2 73-34 128-101 227-97 89 4 139 72 240 62 100-10 139-76 238-67 70 7 119 52 173 82v294H0Z" fill="#0a2b20"/>
+  <path d="M0 348c142-50 257-52 368-8 95 38 158 14 245-22 112-47 202-51 317-3 124 53 241 24 470-47v292H0Z" fill="#0e432f"/>
+  <path d="M133 560c75-151 176-232 307-243 154-13 244 89 390 75 168-16 247-111 405-103 80 4 137 30 165 49v222Z" fill="url(#fairway)"/>
+  <path d="M320 560c73-95 133-144 218-158 104-17 183 28 273 22 114-7 167-70 276-78 93-7 166 19 313 80v134Z" fill="#154d37" opacity=".78"/>
+  <path d="M184 445c192-13 287 43 430 48 156 5 260-52 416-62 121-7 212 14 333 56" fill="none" stroke="#78a27f" stroke-opacity=".18" stroke-width="4"/>
+  <g opacity=".86">
+    <path d="M1118 182v208" stroke="url(#gold)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M1122 187c45 6 72 23 93 46-33 9-62 12-93 8Z" fill="url(#gold)"/>
+  </g>
+  <ellipse cx="1118" cy="399" rx="76" ry="20" fill="#00170f" opacity=".58"/>
+  <g fill="#01160f" opacity=".92">
+    <path d="M37 389l29-86 27 86Z"/><path d="M76 392l36-106 33 106Z"/><path d="M123 395l26-79 25 79Z"/>
+    <path d="M1250 350l31-93 30 93Z"/><path d="M1296 357l39-117 36 117Z"/>
+  </g>
+  <path d="M0 0h1400v560H0z" fill="none" stroke="#d5ae4b" stroke-opacity=".14" stroke-width="3"/>
+</svg>
