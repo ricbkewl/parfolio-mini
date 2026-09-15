@@ -1,5 +1,6 @@
 import { init } from '@nimiq/mini-app-sdk'
 import './styles.css'
+import { californiaRegions, californiaBounds, findCaliforniaCourses, mapUrl } from './california-courses.js'
 
 const app = document.querySelector('#app')
 
@@ -9,6 +10,8 @@ const state = {
   networkReady: null,
   blockNumber: null,
   verifiedRounds: loadRounds(),
+  courseResults: [],
+  selectedCourse: null,
 }
 
 function loadRounds() {
@@ -201,9 +204,23 @@ function render() {
           <span class="security">🔐 Signed by your wallet</span>
         </div>
 
+        <div class="ca-course-finder" aria-label="California golf courses">
+          <p class="eyebrow">California course finder · GPS course locations</p>
+          <p class="course-finder-note">Choose a region or find courses near you. Map points locate the course; hole and green distances are not available yet.</p>
+          <div class="course-finder-controls">
+            <label for="caRegion">California region</label>
+            <select id="caRegion">${californiaRegions.map((region) => `<option value="${region.id}">${escapeHtml(region.label)}</option>`).join('')}</select>
+            <button id="searchCourses" type="button">Search courses</button>
+            <button id="nearbyCourses" type="button">Use my location</button>
+          </div>
+          <p id="courseStatus" class="helper" role="status" aria-live="polite">Course search uses OpenStreetMap. You can always enter a course below.</p>
+          <div id="courseResults" class="course-results"></div>
+          <small class="course-attribution">Course locations © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></small>
+        </div>
+
         <form id="roundForm" class="round-form">
           <label>Course
-            <input name="course" required maxlength="80" placeholder="e.g. Oak Quarry Golf Club" />
+            <input name="course" required maxlength="80" placeholder="e.g. Oak Quarry Golf Club" value="${escapeHtml(state.selectedCourse?.name || '')}" />
           </label>
           <div class="form-grid two">
             <label>Date
@@ -377,6 +394,7 @@ async function verifyRound(form) {
       blockNumber: state.blockNumber,
     })
     saveRounds()
+    state.selectedCourse = null
     render()
     requestAnimationFrame(() => document.querySelector('.records-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   } catch (error) {
@@ -404,6 +422,64 @@ async function shareRecord(index, button) {
   }
 }
 
+
+function showCourseResults(courses) {
+  const container = document.querySelector('#courseResults')
+  state.courseResults = courses
+  container.innerHTML = courses.length
+    ? courses.map((course, index) => `<article class="course-result">
+        <div><b>${escapeHtml(course.name)}</b><small>${course.distance.toFixed(1)} mi from search point · GPS course point</small></div>
+        <div class="course-result-actions">
+          <button type="button" data-select-course="${index}">Use course</button>
+          <a href="${mapUrl(course)}" target="_blank" rel="noopener noreferrer">Map ↗</a>
+        </div>
+      </article>`).join('')
+    : '<p class="helper">No mapped golf courses found here. Try another region or enter the course manually.</p>'
+}
+
+async function searchCoursesAt(lat, lon) {
+  const status = document.querySelector('#courseStatus')
+  const controls = document.querySelectorAll('#searchCourses, #nearbyCourses')
+  controls.forEach((button) => { button.disabled = true })
+  status.textContent = 'Finding mapped California golf courses…'
+  try {
+    const courses = await findCaliforniaCourses(lat, lon)
+    showCourseResults(courses)
+    status.textContent = courses.length
+      ? `Found ${courses.length} courses. Select one to add it to your round.`
+      : 'No courses were found here. Choose another region or enter one manually.'
+  } catch (error) {
+    status.textContent = error?.message || 'Course search failed. You can enter a course manually.'
+  } finally {
+    controls.forEach((button) => { button.disabled = false })
+  }
+}
+
+function searchCaliforniaRegion() {
+  const region = californiaRegions.find((item) => item.id === document.querySelector('#caRegion')?.value)
+  if (region) searchCoursesAt(region.lat, region.lon)
+}
+
+function searchNearbyCaliforniaCourses() {
+  const status = document.querySelector('#courseStatus')
+  if (!navigator.geolocation) {
+    status.textContent = 'Location is unavailable here. Choose a California region or enter a course manually.'
+    return
+  }
+  status.textContent = 'Requesting location permission for nearby California courses…'
+  navigator.geolocation.getCurrentPosition(
+    ({ coords }) => {
+      if (!californiaBounds(coords.latitude, coords.longitude)) {
+        status.textContent = 'Your location is outside the California search area. Choose a California region instead.'
+        return
+      }
+      searchCoursesAt(coords.latitude, coords.longitude)
+    },
+    () => { status.textContent = 'Location was unavailable or denied. Choose a California region instead.' },
+    { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 },
+  )
+}
+
 function bindEvents() {
   document.querySelector('#connectWallet')?.addEventListener('click', connectWallet)
   document.querySelectorAll('[data-share-round]').forEach((button) => button.addEventListener('click', () => shareRecord(Number(button.dataset.shareRound), button)))
@@ -411,6 +487,21 @@ function bindEvents() {
     event.preventDefault()
     verifyRound(event.currentTarget)
   })
+
+  document.querySelector('#searchCourses')?.addEventListener('click', () => searchCaliforniaRegion())
+  document.querySelector('#nearbyCourses')?.addEventListener('click', searchNearbyCaliforniaCourses)
+  document.querySelector('#courseResults')?.addEventListener('click', (event) => {
+    const select = event.target.closest('[data-select-course]')
+    if (!select) return
+    const course = state.courseResults[Number(select.dataset.selectCourse)]
+    if (!course) return
+    state.selectedCourse = course
+    const input = document.querySelector('input[name="course"]')
+    input.value = course.name
+    document.querySelector('#courseStatus').textContent = `${course.name} added to your round. Course GPS point is available on the map.`
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
+  document.querySelector('input[name="course"]')?.addEventListener('input', () => { state.selectedCourse = null })
 
   const dateInput = document.querySelector('input[name="date"]')
   if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10)
