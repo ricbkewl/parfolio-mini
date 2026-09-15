@@ -1,4 +1,4 @@
-const HERO_IMAGE='/parfolio-mini-hero.webp'
+const HERO_IMAGE='/parfolio-mini-hero-final.jpg'
 
 function installLandingStyles(){
   if(document.getElementById('pf-mini-landing-polish'))return
