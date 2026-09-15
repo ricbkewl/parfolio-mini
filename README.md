@@ -1,2 +1,58 @@
-# parfolio-mini
-ParFolio Mini — a Nimiq-powered golf app for verified rounds, skill challenges, and wallet-based rewards.
+# ParFolio Mini
+
+**Your golf game. Verified. Rewarded.**
+
+ParFolio Mini is a focused Nimiq Pay edition of ParFolio built for the Global Mini Apps Building Competition. It lets golfers connect a Nimiq wallet, record a golf round, and cryptographically sign the result to create a wallet-verified golf achievement.
+
+## Competition concept
+
+The core flow is intentionally simple:
+
+1. Connect a Nimiq wallet inside Nimiq Pay.
+2. Record a round: course, date, score, par, birdies, and optional longest drive.
+3. Approve a wallet signature for the round summary.
+4. Save the verified round to the player's local golf history.
+5. Next: enter skill-based golf challenges with transparent NIM-funded rewards.
+
+## Why Nimiq belongs in the product
+
+Nimiq Pay is not decorative in ParFolio Mini. The wallet provides player-controlled identity and cryptographic verification of golf results. The next competition feature extends that same identity into measurable skill challenges and NIM rewards.
+
+## Technology
+
+- Vite
+- `@nimiq/mini-app-sdk`
+- Nimiq Pay injected provider
+- `listAccounts()` for wallet connection
+- `sign()` for verified golf rounds
+- Mobile-first responsive UI
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+For real wallet operations, load the development URL inside Nimiq Pay according to the official Mini Apps development workflow.
+
+## Privacy and security
+
+ParFolio Mini never receives or stores wallet private keys. Sensitive wallet actions are approved through Nimiq Pay. No private keys, API secrets, or sensitive credentials should be committed to this repository.
+
+## Competition status
+
+- [x] Public repository
+- [x] MIT licensed
+- [x] Nimiq Mini App SDK integration
+- [x] Wallet connection
+- [x] Wallet-signed verified rounds
+- [ ] Skill challenge flow
+- [ ] NIM reward/payment flow
+- [ ] Deployment and Nimiq Pay device testing
+- [ ] 25+ real-wallet user test campaign
+- [ ] Submission video and final 250-word description
+
+## License
+
+MIT
