@@ -75,7 +75,7 @@ function render() {
     <main class="shell">
       <header class="topbar">
         <div class="brand-lockup">
-          <img class="brand-mark" src="/parfolio-mini-mark.svg" alt="ParFolio Mini logo" />
+          <img class="brand-mark" src="/parfolio-mini-logo-v2.png" alt="ParFolio Mini logo" />
           <div>
             <p class="brand">ParFolio Mini</p>
             <p class="tagline">Your golf game. Recorded. Signed.</p>
@@ -110,7 +110,7 @@ function render() {
             <div class="phone-screen">
               <div class="phone-status"><span>PARFOLIO MINI</span><span>✦ DEMO ROUND</span></div>
               <div class="phone-brand">
-                <img src="/parfolio-mini-mark.svg" alt="" aria-hidden="true" />
+                <img src="/parfolio-mini-logo-v2.png" alt="" aria-hidden="true" />
                 <div><strong>ParFolio Mini</strong><small>Your round. Signed.</small></div>
               </div>
               <span class="round-verified"><span></span>Wallet signed</span>
