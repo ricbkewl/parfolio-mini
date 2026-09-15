@@ -1,11 +1,19 @@
+/* ParFolio Mini competition round player.
+   Reuses the production ParFolio Google Maps approach and the same validated
+   course payload contract. Mini owns only its round/session/signing state. */
 const PARFOLIO_SUPABASE_URL='https://unsysuuhykdmbsasdhzg.supabase.co'
 const PARFOLIO_PUBLISHABLE_KEY='sb_publishable_lNH7z0PA6wVEztP3Bp4IUQ_xxBa38_f'
+const PARFOLIO_RUNTIME_CONFIG='https://parfolio-iota.vercel.app/api/runtime-config'
 
 let active=null
 let watchId=null
+let mapsPromise=null
+let googleMap=null
+let googleOverlays=[]
 
-const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))
+const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
 const validPoint=value=>value&&Number.isFinite(Number(value.lat))&&Number.isFinite(Number(value.lng))&&Math.abs(Number(value.lat))<=90&&Math.abs(Number(value.lng))<=180&&!(Number(value.lat)===0&&Number(value.lng)===0)
+const cleanPoint=value=>validPoint(value)?{lat:Number(value.lat),lng:Number(value.lng)}:null
 const rad=value=>Number(value)*Math.PI/180
 function yardsBetween(a,b){const lat1=rad(a.lat),lat2=rad(b.lat),dLat=lat2-lat1,dLng=rad(b.lng)-rad(a.lng),h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2;return 6371008.8*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h))*1.0936133}
 
@@ -30,21 +38,6 @@ function validatePayload(payload,course){
   return {holes,greens}
 }
 
-function bboxForHole(hole){
-  const points=[hole.tee,hole.center,hole.front,hole.back,hole.aim1,hole.aim2].filter(validPoint)
-  let minLat=Math.min(...points.map(p=>Number(p.lat))),maxLat=Math.max(...points.map(p=>Number(p.lat)))
-  let minLng=Math.min(...points.map(p=>Number(p.lng))),maxLng=Math.max(...points.map(p=>Number(p.lng)))
-  const latPad=Math.max((maxLat-minLat)*0.45,0.0012),lngPad=Math.max((maxLng-minLng)*0.45,0.0012)
-  minLat-=latPad;maxLat+=latPad;minLng-=lngPad;maxLng+=lngPad
-  return `${minLng},${minLat},${maxLng},${maxLat}`
-}
-
-function mapEmbed(hole){
-  const bbox=encodeURIComponent(bboxForHole(hole))
-  const center=hole.center
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${encodeURIComponent(center.lat)}%2C${encodeURIComponent(center.lng)}`
-}
-
 function parFor(hole){const par=Number(hole?.par);return Number.isFinite(par)&&par>=2&&par<=7?par:4}
 function currentHole(){return active?.greens?.[active.index]}
 function currentScore(){return active?.scores?.[active.index]??parFor(currentHole())}
@@ -52,18 +45,68 @@ function totalScore(){return active.scores.reduce((sum,value,index)=>sum+(value?
 function totalPar(){return active.greens.reduce((sum,hole)=>sum+parFor(hole),0)}
 function birdies(){return active.scores.reduce((sum,value,index)=>sum+((value??parFor(active.greens[index]))<parFor(active.greens[index])?1:0),0)}
 
+function loadGoogleMaps(){
+  if(window.google?.maps?.Map)return Promise.resolve(window.google.maps)
+  if(mapsPromise)return mapsPromise
+  mapsPromise=new Promise((resolve,reject)=>{
+    const callback='__parfolioMiniGoogleReady'
+    const finish=()=>window.google?.maps?.Map?resolve(window.google.maps):reject(new Error('Google Maps did not initialize.'))
+    const loadApi=()=>{
+      const key=String(window.PARFOLIO_GOOGLE_MAPS_API_KEY||'').trim()
+      if(!key){reject(new Error('ParFolio Google Maps configuration is unavailable.'));return}
+      window[callback]=()=>{try{delete window[callback]}catch{};finish()}
+      const script=document.createElement('script')
+      script.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=weekly&loading=async&callback=${callback}`
+      script.async=true;script.defer=true;script.onerror=()=>reject(new Error('Google Maps failed to load.'))
+      document.head.appendChild(script)
+    }
+    if(window.PARFOLIO_GOOGLE_MAPS_API_KEY){loadApi();return}
+    const config=document.createElement('script')
+    config.src=`${PARFOLIO_RUNTIME_CONFIG}?v=${Date.now()}`
+    config.async=true;config.onload=loadApi;config.onerror=()=>reject(new Error('ParFolio map configuration could not be loaded.'))
+    document.head.appendChild(config)
+  }).catch(error=>{mapsPromise=null;throw error})
+  return mapsPromise
+}
+
+function clearGoogleOverlays(){
+  googleOverlays.forEach(item=>{try{item.setMap(null)}catch{}})
+  googleOverlays=[]
+}
+
+function coursePoints(hole){return [hole.tee,hole.aim1,hole.aim2,hole.front,hole.center,hole.back].filter(validPoint).map(cleanPoint)}
+
+function drawGoogleHole(){
+  const container=document.querySelector('#pfGoogleHoleMap')
+  const hole=currentHole()
+  if(!container||!hole||!window.google?.maps)return
+  if(!googleMap){
+    googleMap=new google.maps.Map(container,{mapTypeId:'satellite',disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',keyboardShortcuts:false,tilt:0,heading:0,backgroundColor:'#10251e'})
+  }
+  clearGoogleOverlays()
+  const points=coursePoints(hole)
+  const route=[hole.tee,hole.aim1,hole.aim2,hole.center].filter(validPoint).map(cleanPoint)
+  if(route.length>=2)googleOverlays.push(new google.maps.Polyline({map:googleMap,path:route,strokeColor:'#f2d675',strokeOpacity:.95,strokeWeight:3,zIndex:800}))
+  googleOverlays.push(new google.maps.Marker({map:googleMap,position:cleanPoint(hole.tee),title:'Tee',icon:{path:google.maps.SymbolPath.CIRCLE,scale:6,fillColor:'#ffffff',fillOpacity:1,strokeColor:'#173c2b',strokeWeight:2}}))
+  googleOverlays.push(new google.maps.Marker({map:googleMap,position:cleanPoint(hole.center),title:'Green center',icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#f2d675',fillOpacity:1,strokeColor:'#ffffff',strokeWeight:2}}))
+  if(active.position&&active.nearCourse){googleOverlays.push(new google.maps.Marker({map:googleMap,position:cleanPoint(active.position),title:'You',icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#4ea8ff',fillOpacity:1,strokeColor:'#ffffff',strokeWeight:3}}))}
+  const bounds=new google.maps.LatLngBounds();points.forEach(point=>bounds.extend(point));if(active.position&&active.nearCourse)bounds.extend(cleanPoint(active.position))
+  googleMap.fitBounds(bounds,{top:72,right:58,bottom:72,left:58})
+  google.maps.event.addListenerOnce(googleMap,'idle',()=>{const z=Number(googleMap.getZoom()||17);if(z>19)googleMap.setZoom(19)})
+}
+
 function ensureStyles(){
   if(document.getElementById('pf-round-play-style'))return
   const style=document.createElement('style')
   style.id='pf-round-play-style'
   style.textContent=`
   .pf-round-shell{position:fixed;inset:0;z-index:9999;background:#061c15;color:#f8f7ef;display:flex;flex-direction:column;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-  .pf-round-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:rgba(4,24,18,.97);border-bottom:1px solid rgba(255,255,255,.1)}
+  .pf-round-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:rgba(4,24,18,.98);border-bottom:1px solid rgba(255,255,255,.1)}
   .pf-round-top button{border:0;background:rgba(255,255,255,.08);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800}.pf-round-course{min-width:0}.pf-round-course b,.pf-round-course span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pf-round-course span{font-size:.72rem;color:#a9b7b1;margin-top:2px}
   .pf-hole-strip{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:10px 14px;background:#0b2c21}.pf-hole-strip strong{text-align:center;font-size:1.05rem}.pf-hole-strip span:last-child{text-align:right}.pf-hole-strip span{font-size:.76rem;color:#d9c477;font-weight:800}
-  .pf-round-map{position:relative;flex:1;min-height:300px;background:#10251e;overflow:hidden}.pf-round-map iframe{width:100%;height:100%;border:0;display:block;filter:saturate(.82) contrast(1.03)}
-  .pf-yardage{position:absolute;left:14px;top:14px;background:rgba(3,20,15,.9);border:1px solid rgba(236,206,113,.42);border-radius:16px;padding:10px 13px;box-shadow:0 8px 24px rgba(0,0,0,.24)}.pf-yardage b{display:block;font-size:1.5rem;color:#f0d274}.pf-yardage span{display:block;font-size:.66rem;color:#b8c3be;text-transform:uppercase;letter-spacing:.08em}
-  .pf-gps-btn{position:absolute;right:14px;top:14px;border:1px solid rgba(255,255,255,.2);background:rgba(3,20,15,.9);color:#fff;border-radius:14px;padding:10px 12px;font-weight:800}.pf-gps-status{position:absolute;left:14px;bottom:14px;right:14px;background:rgba(3,20,15,.86);border-radius:12px;padding:9px 11px;font-size:.72rem;color:#c9d3ce}
+  .pf-round-map{position:relative;flex:1;min-height:320px;background:#10251e;overflow:hidden}.pf-google-map{width:100%;height:100%;min-height:320px}.pf-map-loading{position:absolute;inset:0;display:grid;place-items:center;background:#10251e;color:#cbd6d1;font-size:.82rem;z-index:1}
+  .pf-yardage{position:absolute;left:14px;top:14px;z-index:4;background:rgba(3,20,15,.9);border:1px solid rgba(236,206,113,.42);border-radius:16px;padding:10px 13px;box-shadow:0 8px 24px rgba(0,0,0,.24)}.pf-yardage b{display:block;font-size:1.5rem;color:#f0d274}.pf-yardage span{display:block;font-size:.66rem;color:#b8c3be;text-transform:uppercase;letter-spacing:.08em}
+  .pf-gps-btn{position:absolute;right:14px;top:14px;z-index:4;border:1px solid rgba(255,255,255,.2);background:rgba(3,20,15,.9);color:#fff;border-radius:14px;padding:10px 12px;font-weight:800}.pf-gps-status{position:absolute;left:14px;bottom:14px;right:14px;z-index:4;background:rgba(3,20,15,.86);border-radius:12px;padding:9px 11px;font-size:.72rem;color:#c9d3ce}
   .pf-score-panel{padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:#071b15;border-top:1px solid rgba(255,255,255,.1)}.pf-score-summary{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:.8rem;color:#c6d0cb}.pf-score-summary b{color:#fff}
   .pf-score-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}.pf-score-row button{min-height:52px;border-radius:15px;border:1px solid rgba(255,255,255,.16);background:#113429;color:#fff;font-size:1.45rem;font-weight:900}.pf-score-value{text-align:center}.pf-score-value strong{display:block;font-size:2rem}.pf-score-value span{font-size:.7rem;color:#aebbb5}
   .pf-round-actions{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;margin-top:10px}.pf-round-actions button{min-height:46px;border-radius:13px;border:1px solid rgba(255,255,255,.13);background:#0d3025;color:#fff;font-weight:850}.pf-round-actions .finish{background:linear-gradient(135deg,#d5b85d,#f3dc89);color:#102016;border-color:#ead379}.pf-round-actions button:disabled{opacity:.35}
@@ -78,15 +121,15 @@ function renderRound(){
   ensureStyles()
   let shell=document.querySelector('.pf-round-shell')
   if(!shell){shell=document.createElement('section');shell.className='pf-round-shell';document.body.appendChild(shell)}
-  const hole=currentHole(),par=parFor(hole),score=currentScore(),toPar=totalScore()-totalPar()
-  const teeYards=Math.round(yardsBetween(hole.tee,hole.center))
-  const liveYards=active.position&&validPoint(active.position)?Math.round(yardsBetween(active.position,hole.center)):null
+  const hole=currentHole(),par=parFor(hole),score=currentScore(),toPar=totalScore()-totalPar(),teeYards=Math.round(yardsBetween(hole.tee,hole.center))
+  const liveYards=active.position&&active.nearCourse?Math.round(yardsBetween(active.position,hole.center)):null
   shell.innerHTML=`
     <div class="pf-round-top"><button type="button" data-pf-exit>× Exit</button><div class="pf-round-course"><b>${esc(active.course.name)}</b><span>${esc([active.course.city,active.course.state].filter(Boolean).join(', '))} · GPS Ready</span></div><button type="button" data-pf-scorecard>${active.index+1}/${active.holes}</button></div>
     <div class="pf-hole-strip"><span>PAR ${par}</span><strong>Hole ${active.index+1}</strong><span>${teeYards} yd tee→green</span></div>
-    <div class="pf-round-map"><iframe title="Hole ${active.index+1} map" src="${mapEmbed(hole)}" loading="eager" referrerpolicy="no-referrer"></iframe><div class="pf-yardage"><span>to green center</span><b>${liveYards??teeYards} yd</b><span>${liveYards?'from your GPS':'from mapped tee'}</span></div><button class="pf-gps-btn" type="button" data-pf-gps>${active.position?'GPS ✓':'Use GPS'}</button><div class="pf-gps-status">${esc(active.gpsMessage||'Tap Use GPS for live distance to the green center. Map geometry comes from ParFolio’s validated course catalog.')}</div></div>
+    <div class="pf-round-map"><div id="pfGoogleHoleMap" class="pf-google-map"></div><div class="pf-map-loading">Loading ParFolio satellite map…</div><div class="pf-yardage"><span>to green center</span><b>${liveYards??teeYards} yd</b><span>${liveYards?'from your GPS':'mapped hole yardage'}</span></div><button class="pf-gps-btn" type="button" data-pf-gps>${active.position&&active.nearCourse?'GPS ✓':'Use GPS'}</button><div class="pf-gps-status">${esc(active.gpsMessage||'Satellite hole view uses ParFolio’s validated GPS geometry. Tap Use GPS when you are at the course.')}</div></div>
     <div class="pf-score-panel"><div class="pf-score-summary"><span>Running score <b>${totalScore()}</b></span><span>${toPar===0?'Even':`${toPar>0?'+':''}${toPar}`} to par</span></div><div class="pf-score-row"><button type="button" data-score-delta="-1">−</button><div class="pf-score-value"><strong>${score}</strong><span>${score-par===0?'PAR':score-par<0?`${Math.abs(score-par)} UNDER`:`${score-par} OVER`}</span></div><button type="button" data-score-delta="1">+</button></div><div class="pf-round-actions"><button type="button" data-pf-prev ${active.index===0?'disabled':''}>← Prev</button><button type="button" data-pf-next ${active.index===active.holes-1?'disabled':''}>Next →</button><button class="finish" type="button" data-pf-finish>Finish round</button></div></div>`
   bindRoundControls(shell)
+  loadGoogleMaps().then(()=>{document.querySelector('.pf-map-loading')?.remove();googleMap=null;drawGoogleHole()}).catch(error=>{const loading=document.querySelector('.pf-map-loading');if(loading)loading.textContent=`Google Maps unavailable: ${error.message}`})
 }
 
 function bindRoundControls(shell){
@@ -102,14 +145,19 @@ function bindRoundControls(shell){
 function startGps(){
   if(!navigator.geolocation){active.gpsMessage='Live GPS is unavailable on this device.';renderRound();return}
   if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}
-  active.gpsMessage='Acquiring your location…'
-  renderRound()
-  watchId=navigator.geolocation.watchPosition(({coords})=>{active.position={lat:coords.latitude,lng:coords.longitude};active.gpsMessage=`Live GPS · accuracy about ${Math.round(coords.accuracy)} m`;renderRound()},()=>{active.gpsMessage='Location was unavailable or denied. Showing mapped tee-to-green yardage.';renderRound()},{enableHighAccuracy:true,timeout:15000,maximumAge:5000})
+  active.gpsMessage='Acquiring your location…';renderRound()
+  watchId=navigator.geolocation.watchPosition(({coords})=>{
+    active.position={lat:coords.latitude,lng:coords.longitude}
+    const distance=Math.round(yardsBetween(active.position,currentHole().center))
+    active.nearCourse=distance<=2200
+    active.gpsMessage=active.nearCourse?`Live GPS · accuracy about ${Math.round(coords.accuracy)} m`:`You are not at this course. Showing mapped hole yardage for remote viewing.`
+    renderRound()
+  },()=>{active.gpsMessage='Location was unavailable or denied. Showing mapped hole yardage.';active.nearCourse=false;renderRound()},{enableHighAccuracy:true,timeout:15000,maximumAge:5000})
 }
 
 function closeRound(){
   if(watchId!==null&&navigator.geolocation){navigator.geolocation.clearWatch(watchId);watchId=null}
-  document.querySelector('.pf-round-shell')?.remove();active=null
+  clearGoogleOverlays();googleMap=null;document.querySelector('.pf-round-shell')?.remove();active=null
 }
 
 function finishRound(){
@@ -120,38 +168,17 @@ function finishRound(){
     Object.entries(values).forEach(([name,value])=>{const field=form.elements.namedItem(name);if(field){field.value=value;field.dispatchEvent(new Event('input',{bubbles:true}));field.dispatchEvent(new Event('change',{bubbles:true}))}})
     const date=form.elements.namedItem('date');if(date&&!date.value)date.value=new Date().toISOString().slice(0,10)
   }
-  closeRound()
-  const message=document.querySelector('#formMessage')
-  if(message)message.textContent=`Round complete: ${score} on par ${par} at ${course}. Sign it with your Nimiq wallet to save the record.`
-  form?.scrollIntoView({behavior:'smooth',block:'start'})
-  const submit=form?.querySelector('button[type="submit"]')
-  if(submit&&!submit.disabled)setTimeout(()=>form.requestSubmit(),450)
+  closeRound();const message=document.querySelector('#formMessage');if(message)message.textContent=`Round complete: ${score} on par ${par} at ${course}. Sign it with your Nimiq wallet to save the record.`
+  form?.scrollIntoView({behavior:'smooth',block:'start'});const submit=form?.querySelector('button[type="submit"]');if(submit&&!submit.disabled)setTimeout(()=>form.requestSubmit(),450)
 }
 
 async function startRound(course){
   if(!course?.id)return
-  ensureStyles()
-  const loading=document.createElement('div');loading.className='pf-round-loading';loading.innerHTML=`<div><strong>Preparing ${esc(course.name)}</strong><p>Loading and validating the GPS-ready hole geometry before play.</p></div>`;document.body.appendChild(loading)
-  try{
-    const payload=await rpc('parfolio_course_payload',{p_course_id:course.id})
-    const {holes,greens}=validatePayload(payload,course)
-    active={course,holes,greens,index:0,scores:greens.map(h=>parFor(h)),touched:Array(holes).fill(false),position:null,gpsMessage:''}
-    loading.remove();renderRound()
-  }catch(error){
-    loading.innerHTML=`<div><strong>Course could not start</strong><p>${esc(error?.message||'GPS geometry could not be loaded.')}</p><button type="button">Back to courses</button></div>`
-    loading.querySelector('button')?.addEventListener('click',()=>loading.remove())
-  }
+  ensureStyles();const loading=document.createElement('div');loading.className='pf-round-loading';loading.innerHTML=`<div><strong>Preparing ${esc(course.name)}</strong><p>Loading ParFolio’s validated GPS geometry and satellite round view.</p></div>`;document.body.appendChild(loading)
+  try{const payload=await rpc('parfolio_course_payload',{p_course_id:course.id});const {holes,greens}=validatePayload(payload,course);active={course,holes,greens,index:0,scores:greens.map(h=>parFor(h)),touched:Array(holes).fill(false),position:null,nearCourse:false,gpsMessage:''};loading.remove();renderRound()}
+  catch(error){loading.innerHTML=`<div><strong>Course could not start</strong><p>${esc(error?.message||'GPS geometry could not be loaded.')}</p><button type="button">Back to courses</button></div>`;loading.querySelector('button')?.addEventListener('click',()=>loading.remove())}
 }
 
 window.addEventListener('parfolio:course-selected',event=>startRound(event.detail))
-document.addEventListener('click',event=>{
-  const button=event.target.closest?.('[data-use-pf-course]')
-  if(!button)return
-  const row=button.closest('.pf-mini-catalog-result,.course-result')
-  const name=row?.querySelector('b')?.textContent?.trim()||'Golf Course'
-  const meta=row?.querySelector('small')?.textContent||''
-  const location=meta.split('·')[0].trim()
-  const parts=location.split(',').map(value=>value.trim())
-  setTimeout(()=>startRound({id:button.dataset.usePfCourse,name,city:parts[0]||'',state:(parts[1]||'CA').split(/\s+/)[0],holes:18}),0)
-})
+document.addEventListener('click',event=>{const button=event.target.closest?.('[data-use-pf-course]');if(!button)return;const row=button.closest('.pf-mini-catalog-result,.course-result');const name=row?.querySelector('b')?.textContent?.trim()||'Golf Course';const meta=row?.querySelector('small')?.textContent||'';const location=meta.split('·')[0].trim();const parts=location.split(',').map(value=>value.trim());setTimeout(()=>startRound({id:button.dataset.usePfCourse,name,city:parts[0]||'',state:(parts[1]||'CA').split(/\s+/)[0],holes:18}),0)})
 ensureStyles()
