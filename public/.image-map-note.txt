@@ -1,0 +1,1 @@
+Temporary image mapping marker. Real raster page images are being mapped from manually uploaded PNGs.
