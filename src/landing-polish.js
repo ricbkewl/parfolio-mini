@@ -1,4 +1,4 @@
-import HERO_IMAGE from './wallet-hero-data.js'
+const HERO_IMAGE='/parfolio-mini-hero-final.jpg?v=20260915-1858'
 
 function installLandingStyles(){
   if(document.getElementById('pf-mini-landing-polish'))return
