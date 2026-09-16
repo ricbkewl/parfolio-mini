@@ -1,13 +1,13 @@
 const PAGE_KEY='parfolio-mini:page-v1'
 
 const PAGE_IMAGES={
-  home:'/A07131CC-8C1C-4BA1-8ECC-02FCE25E8FB1.png',
-  play:'/71801855-9EE9-4DB6-AB7C-AAD29FF7CEB8.png',
-  skins:'/AF31B066-16CA-4694-B548-557289482F11.png',
-  wallet:'/24990F69-5962-4C9C-858C-685D08F5C222.png',
-  rounds:'/7B60F61E-9FDB-481C-B77F-DAAD3E8B3C90.png',
-  clubs:'/32F7D526-6622-4CD2-AD7D-FE737120E318.png',
-  how:'/B4E75CCF-E78D-4FEB-A48F-1088618A56B2.png'
+  home:'/9B68D5FF-8CCE-40FA-8F35-7F5828913002.png',
+  play:'/24C0A58C-92A8-4778-9031-96CC85894A3E.png',
+  skins:'/BBD9E894-52EA-47B8-88F7-3D8E6F079D81.png',
+  wallet:'/905BCCA7-6CD7-4A83-BD0E-BCB1E0C871CF.png',
+  rounds:'/417CAD54-2A36-4671-834C-1CBA0D148224.png',
+  clubs:'/A0077D56-18EF-43BC-9C9F-0312956363F5.png',
+  how:'/E9CA092A-116F-4D8E-AE7E-C13A43D52E41.png'
 }
 
 function installPageStyles(){
@@ -19,8 +19,8 @@ function installPageStyles(){
   .pf-pages{width:min(100%,1080px);margin:0 auto;padding:0 20px max(34px,env(safe-area-inset-bottom))}
   .pf-app-page{display:none;animation:pfPageIn .18s ease}.pf-app-page.active{display:block}
   @keyframes pfPageIn{from{opacity:.55;transform:translateY(5px)}to{opacity:1;transform:none}}
-  .pf-page-visual{margin:0 0 22px;border-radius:28px;overflow:hidden;border:1px solid rgba(229,199,99,.22);background:#061b13;box-shadow:0 22px 55px rgba(0,0,0,.24)}
-  .pf-page-visual img{display:block;width:100%;aspect-ratio:16/7;object-fit:cover;background:#061b13}
+  .pf-page-visual{width:min(100%,620px);margin:0 auto 22px;border-radius:28px;overflow:hidden;border:1px solid rgba(229,199,99,.22);background:#061b13;box-shadow:0 22px 55px rgba(0,0,0,.24)}
+  .pf-page-visual img{display:block;width:100%;height:auto;aspect-ratio:auto!important;object-fit:contain!important;background:#061b13}
   .pf-page-title{margin:0 0 18px}.pf-page-title .eyebrow{margin-bottom:6px}.pf-page-title h1{max-width:none;font-size:clamp(2.1rem,6vw,4rem);line-height:.98;margin:0 0 10px}.pf-page-title p{max-width:760px;color:#afc0b8;line-height:1.55;margin:0}
   .pf-nim-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.pf-nim-card,.pf-flow-card{border:1px solid rgba(255,255,255,.09);background:linear-gradient(155deg,rgba(12,45,34,.92),rgba(5,26,19,.92));border-radius:22px;padding:20px}.pf-nim-card h2,.pf-flow-card h3{margin:0 0 8px}.pf-nim-card p,.pf-flow-card p{color:#aebeb6;line-height:1.55}.pf-nim-steps{display:grid;gap:10px;margin-top:14px}.pf-nim-step{display:grid;grid-template-columns:38px 1fr;gap:11px;align-items:start;padding:12px;border-radius:15px;background:rgba(255,255,255,.045)}.pf-nim-step strong{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:rgba(232,204,107,.14);color:#f0d77c}.pf-nim-step b{display:block;margin-bottom:3px}.pf-nim-step span{font-size:.78rem;color:#a9bbb2;line-height:1.4}
   .pf-nim-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}.pf-nim-actions a,.pf-nim-actions button{min-height:45px;border-radius:12px;padding:0 14px;font-weight:900;text-decoration:none;display:inline-flex;align-items:center;border:1px solid rgba(232,204,107,.34);background:#e1c66b;color:#102017}.pf-nim-actions .secondary{background:#13372c;color:#fff;border-color:rgba(255,255,255,.13)}
@@ -29,8 +29,8 @@ function installPageStyles(){
   .pf-app-page .hero{margin:0}.pf-app-page .steps-panel,.pf-app-page .golf-banner{margin-top:20px}
   .pf-drawer .pf-nav-item.active{background:rgba(239,212,118,.11);color:#f4dd8b}.pf-drawer .pf-nav-item.active i{color:#f4dd8b}
   .workspace-grid:empty{display:none}.shell>.workspace-grid{display:none!important}
-  @media(max-width:760px){.pf-pages{padding:0 12px max(28px,env(safe-area-inset-bottom))}.pf-page-visual{border-radius:20px}.pf-page-visual img{aspect-ratio:4/3;object-fit:cover}.pf-nim-grid{grid-template-columns:1fr}.pf-flow-grid{grid-template-columns:1fr 1fr}}
-  @media(max-width:440px){.pf-flow-grid{grid-template-columns:1fr}.pf-page-title h1{font-size:2.35rem}}
+  @media(max-width:760px){.pf-pages{padding:0 8px max(28px,env(safe-area-inset-bottom))}.pf-page-visual{width:100%;border-radius:22px;margin-bottom:18px}.pf-page-visual img{width:100%;height:auto;aspect-ratio:auto!important;object-fit:contain!important}.pf-nim-grid{grid-template-columns:1fr}.pf-flow-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:440px){.pf-pages{padding-left:6px;padding-right:6px}.pf-flow-grid{grid-template-columns:1fr}.pf-page-title h1{font-size:2.35rem}}
   `
   document.head.appendChild(style)
 }
