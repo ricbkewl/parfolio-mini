@@ -19,62 +19,55 @@ function connectWallet() {
   }
 }
 
-function ensureCompetitionLanding() {
-  const app = document.querySelector('#app')
-  if (!app || document.querySelector('.competition-landing')) return
+function prepareHeroArtwork(landing) {
+  const hero = landing.querySelector('#competitionHeroImage')
+  if (!hero) return
+  hero.src = heroImage
 
-  const landing = document.createElement('section')
-  landing.className = 'competition-landing'
-  landing.setAttribute('aria-label', 'ParFolio Mini introduction')
-  landing.innerHTML = `
-    <div class="landing-inner">
-      <div class="landing-nav">
-        <div class="landing-brand">
-          <img src="/parfolio-mini-logo-v2.png" alt="ParFolio Mini" />
-          <div><strong>ParFolio Mini</strong><span>Play · Score · Sign · Save</span></div>
-        </div>
-        <button class="wallet-launch" type="button" data-connect-wallet>Connect wallet</button>
-      </div>
+  const shell = hero.closest('.hero-art') || hero.parentElement
+  if (!shell) return
+  shell.classList.add('hero-image-shell')
 
-      <div class="hero-image-shell">
-        <img id="competitionHeroImage" src="${heroImage}" alt="ParFolio Mini: play a GPS-ready golf course, track your round, connect a Nimiq wallet, and save a wallet-signed golf record." />
-        <button class="hero-hotspot hero-hotspot-start" type="button" data-start-round aria-label="Start a round"></button>
-        <button class="hero-hotspot hero-hotspot-how" type="button" data-how-it-works aria-label="How ParFolio Mini works"></button>
-      </div>
+  if (!shell.querySelector('.hero-hotspot-start')) {
+    const start = document.createElement('button')
+    start.type = 'button'
+    start.className = 'hero-hotspot hero-hotspot-start'
+    start.dataset.startRound = ''
+    start.setAttribute('aria-label', 'Start a round')
+    shell.appendChild(start)
+  }
 
-      <div class="mobile-hero-actions" aria-label="ParFolio Mini actions">
-        <button class="start-round" type="button" data-start-round>Start a Round <span aria-hidden="true">→</span></button>
-        <button class="how-button" type="button" data-how-it-works>How It Works</button>
-      </div>
+  if (!shell.querySelector('.hero-hotspot-how')) {
+    const how = document.createElement('button')
+    how.type = 'button'
+    how.className = 'hero-hotspot hero-hotspot-how'
+    how.dataset.howItWorks = ''
+    how.setAttribute('aria-label', 'How ParFolio Mini works')
+    shell.appendChild(how)
+  }
+}
 
-      <section class="how-section" id="howItWorks">
-        <div class="how-head">
-          <div><p class="eyebrow">How it works</p><h2>From the first tee to a signed record.</h2></div>
-          <p>ParFolio Mini keeps the competition experience focused: choose a GPS-ready course, score the round hole by hole, then sign the completed record with your Nimiq wallet.</p>
-        </div>
-        <div class="steps-grid">
-          <article class="step"><span class="step-num">1</span><h3>Choose a course</h3><p>Search the GPS-ready California catalog and start a supported round.</p></article>
-          <article class="step"><span class="step-num">2</span><h3>Track the round</h3><p>Use the ParFolio-style hole view, yardage, navigation and simple scoring controls.</p></article>
-          <article class="step"><span class="step-num">3</span><h3>Sign & save</h3><p>Finish the round and sign the entered result with your connected Nimiq wallet.</p></article>
-        </div>
-      </section>
+function wireLanding() {
+  const landing = document.querySelector('.competition-landing')
+  if (!landing || landing.dataset.wired === '1') return false
 
-      <div class="final-cta">
-        <div><h2>Ready to play?</h2><p>Start with a GPS-ready course and turn the finished round into your wallet-signed golf record.</p></div>
-        <button type="button" data-start-round>Start a Round →</button>
-      </div>
-    </div>
-  `
+  prepareHeroArtwork(landing)
+  landing.dataset.wired = '1'
 
-  app.parentNode.insertBefore(landing, app)
-
-  landing.querySelectorAll('[data-start-round]').forEach((button) => button.addEventListener('click', scrollToRoundSetup))
-  landing.querySelectorAll('[data-how-it-works]').forEach((button) => button.addEventListener('click', scrollToHowItWorks))
-  landing.querySelector('[data-connect-wallet]')?.addEventListener('click', connectWallet)
+  landing.querySelectorAll('[data-start-round]').forEach((button) => {
+    button.addEventListener('click', scrollToRoundSetup)
+  })
+  landing.querySelectorAll('[data-how-it-works]').forEach((button) => {
+    button.addEventListener('click', scrollToHowItWorks)
+  })
+  landing.querySelectorAll('[data-connect-wallet]').forEach((button) => {
+    button.addEventListener('click', connectWallet)
+  })
+  return true
 }
 
 function initLanding() {
-  ensureCompetitionLanding()
+  wireLanding()
   if (!document.querySelector('#verifyRound')) requestAnimationFrame(initLanding)
 }
 
