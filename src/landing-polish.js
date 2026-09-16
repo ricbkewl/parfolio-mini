@@ -1,5 +1,4 @@
-const HERO_IMAGE='/parfolio-mini-hero.webp'
-const HERO_FALLBACK='/parfolio-mini-hero-final.jpg'
+import HERO_IMAGE from './wallet-hero-data.js'
 
 function installLandingStyles(){
   if(document.getElementById('pf-mini-landing-polish'))return
@@ -65,9 +64,6 @@ function decorateLanding(){
       image.alt='ParFolio Mini showing GPS golf play, hole-by-hole scoring, a connected Nimiq wallet, and a wallet-signed golf record.'
       image.decoding='async'
       image.loading='eager'
-      image.addEventListener('error',()=>{
-        if(!image.dataset.fallback){image.dataset.fallback='1';image.src=HERO_FALLBACK}
-      })
       visual.appendChild(image)
     }
     const copy=hero.querySelector('.hero-copy')
