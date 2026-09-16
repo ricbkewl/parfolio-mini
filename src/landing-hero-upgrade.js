@@ -1,5 +1,7 @@
 // ParFolio Mini landing-page visual upgrade.
-// Makes the golf + skins + NIM story understandable at first glance while preserving live app actions.
+// Uses the real uploaded Home artwork and routes actions through the app navigation.
+
+const HOME_ART='/A07131CC-8C1C-4BA1-8ECC-02FCE25E8FB1.png'
 
 function ensureHeroStyles(){
   if(document.getElementById('pf-mini-landing-hero-v2'))return
@@ -9,7 +11,7 @@ function ensureHeroStyles(){
     .hero.pf-visual-hero{display:block!important;padding:0!important;border-radius:34px!important;overflow:hidden!important;background:#071c15!important;border:1px solid rgba(230,198,93,.28)!important;box-shadow:0 34px 90px rgba(0,0,0,.34)!important}
     .hero.pf-visual-hero:before,.hero.pf-visual-hero:after{display:none!important}
     .pf-hero-art-wrap{position:relative;width:100%;background:#0a241b;overflow:hidden}
-    .pf-hero-art{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;object-position:center;filter:saturate(1.03) contrast(1.02)}
+    .pf-hero-art{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;object-position:center;filter:saturate(1.03) contrast(1.02);background:#071c15}
     .pf-hero-art-wrap:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 70%,rgba(3,18,13,.45) 100%)}
     .pf-hero-live-actions{position:relative;z-index:2;display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:10px;padding:14px;background:linear-gradient(180deg,#0b2b20,#061c15);border-top:1px solid rgba(255,255,255,.08)}
     .pf-hero-live-actions button{min-height:50px;border-radius:15px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.055);color:#fff;font-weight:850;font-size:.9rem;letter-spacing:-.01em;box-shadow:inset 0 1px rgba(255,255,255,.05)}
@@ -21,7 +23,7 @@ function ensureHeroStyles(){
     .hero.pf-visual-hero .hero-copy,.hero.pf-visual-hero .hero-visual{display:none!important}
     @media(max-width:720px){
       .hero.pf-visual-hero{border-radius:24px!important;margin-left:-8px;margin-right:-8px}
-      .pf-hero-art{aspect-ratio:4/5;object-fit:cover;object-position:62% center}
+      .pf-hero-art{aspect-ratio:4/5;object-fit:cover;object-position:center}
       .pf-hero-live-actions{grid-template-columns:1fr 1fr;padding:10px;gap:8px}
       .pf-hero-live-actions button{min-height:47px;font-size:.82rem}
       .pf-hero-live-actions button:first-child{grid-column:1/-1}
@@ -41,14 +43,14 @@ function upgradeHero(){
 
   const art=document.createElement('div')
   art.className='pf-hero-art-wrap'
-  art.innerHTML=`<img class="pf-hero-art" src="/parfolio-mini-hero-final.jpg?v=20260916-hero2" alt="ParFolio Mini: GPS golf, live yardage and scoring, skins competition, and wallet-signed NIM settlement" fetchpriority="high" decoding="async">`
+  art.innerHTML=`<img class="pf-hero-art" src="${HOME_ART}" alt="ParFolio Mini golf, GPS play, competition and NIM settlement" fetchpriority="high" decoding="async">`
 
   const actions=document.createElement('div')
   actions.className='pf-hero-live-actions'
   actions.innerHTML=`
-    <button type="button" data-pf-start-round>Start a Round →</button>
-    <button type="button" data-pf-how-it-works>How It Works</button>
-    <button type="button" data-pf-connect-wallet>Connect Wallet</button>
+    <button type="button" data-page="play">Start a Round →</button>
+    <button type="button" data-page="how">How It Works</button>
+    <button type="button" data-page="wallet">Wallet & NIM</button>
   `
 
   const caption=document.createElement('div')
@@ -56,9 +58,6 @@ function upgradeHero(){
   caption.innerHTML=`<strong>Golf. Compete. Settle in NIM.</strong><span>GPS-ready courses · live scoring · optional skins · peer-to-peer settlement</span>`
 
   hero.append(art,actions,caption)
-  actions.querySelector('[data-pf-start-round]')?.addEventListener('click',()=>document.querySelector('.ca-course-finder,#verifyRound')?.scrollIntoView({behavior:'smooth',block:'start'}))
-  actions.querySelector('[data-pf-how-it-works]')?.addEventListener('click',()=>document.querySelector('.steps-panel,.pf-skins-home')?.scrollIntoView({behavior:'smooth',block:'start'}))
-  actions.querySelector('[data-pf-connect-wallet]')?.addEventListener('click',()=>document.querySelector('#connectWallet')?.click())
 }
 
 let queued=false
