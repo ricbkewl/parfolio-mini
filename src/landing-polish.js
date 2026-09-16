@@ -1,4 +1,5 @@
-const HERO_IMAGE='/parfolio-mini-hero-final.jpg'
+const HERO_IMAGE='/parfolio-mini-hero.webp'
+const HERO_FALLBACK='/parfolio-mini-hero-final.jpg'
 
 function installLandingStyles(){
   if(document.getElementById('pf-mini-landing-polish'))return
@@ -9,10 +10,9 @@ function installLandingStyles(){
     .hero-copy h1{max-width:760px!important;line-height:.98!important}
     .hero-copy h1 span{display:inline!important}
     .hero-lede{max-width:700px!important;font-size:1.04rem!important;line-height:1.55!important}
-    .hero-visual{display:block!important;min-height:0!important;padding:0!important;background:none!important;overflow:hidden!important;border-radius:24px!important}
+    .hero-visual{display:block!important;position:relative!important;min-height:0!important;padding:0!important;background:none!important;overflow:hidden!important;border-radius:24px!important}
     .hero-visual>*{display:none!important}
     .hero-visual .pf-mini-hero-art{display:block!important;width:100%!important;height:auto!important;aspect-ratio:16/9!important;object-fit:cover!important;border-radius:24px!important;border:1px solid rgba(242,214,117,.24)!important;box-shadow:0 24px 70px rgba(0,0,0,.28)!important}
-    .hero-visual.hero-image-failed{display:none!important}
     .pf-mini-value-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 0}
     .pf-mini-value-strip span{display:flex;gap:9px;align-items:center;padding:12px 14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.035);color:#e9efeb;font-size:.82rem;line-height:1.3}
     .pf-mini-value-strip b{display:block;color:#f1d476;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase}
@@ -26,13 +26,14 @@ function installLandingStyles(){
     .pf-mini-competition-note{margin:10px 0 0;color:#9fb0a8;font-size:.76rem;line-height:1.45}
     @media(max-width:860px){
       .hero{grid-template-columns:1fr!important;gap:18px!important}
-      .hero-copy{order:0!important}.hero-visual{order:1!important;margin:6px 0 0!important}
-      .hero-visual .pf-mini-hero-art{max-height:260px!important}
+      .hero-visual{order:-1!important;margin:0 0 8px!important}
+      .hero-copy{order:0!important}
+      .hero-visual .pf-mini-hero-art{max-height:none!important;width:100%!important}
       .pf-mini-value-strip{grid-template-columns:1fr!important}
       .hero-copy h1{font-size:clamp(2.15rem,10vw,3.5rem)!important}
     }
     @media(max-width:520px){
-      .hero-visual .pf-mini-hero-art{max-height:210px!important;border-radius:18px!important}
+      .hero-visual .pf-mini-hero-art{max-height:none!important;border-radius:18px!important}
       .hero-visual{border-radius:18px!important}
       .pf-mini-purpose{font-size:.82rem!important}
     }
@@ -58,14 +59,15 @@ function decorateLanding(){
     if(helper&&!document.querySelector('.wallet-chip.connected'))helper.textContent=window.nimiqPay?'Connect your Nimiq wallet, then choose a GPS-ready California course below.':'Open this Mini App inside Nimiq Pay to connect your wallet and start a round.'
     const visual=hero.querySelector('.hero-visual')
     if(visual){
-      visual.classList.remove('hero-image-failed')
       const image=document.createElement('img')
       image.className='pf-mini-hero-art'
       image.src=HERO_IMAGE
-      image.alt='ParFolio Mini: choose a GPS-ready course, track a golf round hole by hole, and save a wallet-signed golf record.'
+      image.alt='ParFolio Mini showing GPS golf play, hole-by-hole scoring, a connected Nimiq wallet, and a wallet-signed golf record.'
       image.decoding='async'
-      image.addEventListener('error',()=>{image.remove();visual.classList.add('hero-image-failed')},{once:true})
-      image.addEventListener('load',()=>visual.classList.remove('hero-image-failed'),{once:true})
+      image.loading='eager'
+      image.addEventListener('error',()=>{
+        if(!image.dataset.fallback){image.dataset.fallback='1';image.src=HERO_FALLBACK}
+      })
       visual.appendChild(image)
     }
     const copy=hero.querySelector('.hero-copy')
