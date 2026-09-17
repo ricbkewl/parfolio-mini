@@ -97,7 +97,10 @@ function showPage(name,push=true){
 function installNavigation(){
   const drawer=document.querySelector('.pf-drawer');if(drawer){drawer.innerHTML=navMarkup();drawer.querySelector('.pf-drawer-close')?.addEventListener('click',closeDrawer)}
   document.addEventListener('click',event=>{
-    const pageBtn=event.target.closest?.('[data-page]');if(pageBtn){event.preventDefault();event.stopImmediatePropagation();showPage(pageBtn.dataset.page);return}
+    // Only interactive navigation controls may change pages. Never treat the
+    // containing .pf-app-page[data-page] section as a navigation target.
+    const pageBtn=event.target.closest?.('button[data-page],a[data-page],.pf-nav-item[data-page]')
+    if(pageBtn){event.preventDefault();event.stopImmediatePropagation();showPage(pageBtn.dataset.page);return}
     const connect=event.target.closest?.('[data-pf-connect-now]');if(connect){const original=document.querySelector('#connectWallet');if(original){original.click();setTimeout(()=>{connect.textContent=walletConnected()?'Wallet connected ✓':'Connect Nimiq Pay'},500)}return}
     const course=event.target.closest?.('[data-use-pf-course]');if(course&&!walletConnected()){event.preventDefault();event.stopImmediatePropagation();showPage('wallet');setTimeout(()=>window.alert('Connect your Nimiq wallet before starting a ParFolio Mini round.'),80)}
     const start=event.target.closest?.('[data-pf-start-round]');if(start&&!walletConnected()){event.preventDefault();event.stopImmediatePropagation();showPage('wallet')}
