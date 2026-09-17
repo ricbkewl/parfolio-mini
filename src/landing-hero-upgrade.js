@@ -1,7 +1,7 @@
 // ParFolio Mini landing-page visual upgrade.
-// Uses the vertical Home artwork and routes actions through the app navigation.
+// Lightweight competition hero with a direct Play → Score → Sign message.
 
-const HOME_ART='/9B68D5FF-8CCE-40FA-8F35-7F5828913002.png'
+const HOME_ART='/parfolio-mini-hero.webp'
 
 function ensureHeroStyles(){
   if(document.getElementById('pf-mini-landing-hero-v2'))return
@@ -42,19 +42,19 @@ function upgradeHero(){
 
   const art=document.createElement('div')
   art.className='pf-hero-art-wrap'
-  art.innerHTML=`<img class="pf-hero-art" src="${HOME_ART}" alt="ParFolio Mini golf, GPS play, competition and NIM settlement" fetchpriority="high" decoding="async">`
+  art.innerHTML=`<img class="pf-hero-art" src="${HOME_ART}" alt="ParFolio Mini GPS golf and wallet-signed round" fetchpriority="high" decoding="async">`
 
   const actions=document.createElement('div')
   actions.className='pf-hero-live-actions'
   actions.innerHTML=`
     <button type="button" data-page="play">Start a Round →</button>
     <button type="button" data-page="how">How It Works</button>
-    <button type="button" data-page="wallet">Wallet & NIM</button>
+    <button type="button" data-page="wallet">My ParFolio</button>
   `
 
   const caption=document.createElement('div')
   caption.className='pf-hero-caption'
-  caption.innerHTML=`<strong>Golf. Compete. Settle in NIM.</strong><span>GPS-ready courses · live scoring · optional skins · peer-to-peer settlement</span>`
+  caption.innerHTML=`<strong>Play. Score. Sign.</strong><span>GPS-ready golf · full-screen scoring · Nimiq wallet signature</span>`
 
   hero.append(art,actions,caption)
 }
