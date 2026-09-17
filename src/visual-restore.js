@@ -1,6 +1,5 @@
 // Restore the original premium ParFolio Mini artwork without reintroducing
-// the removed experimental competition layers. This intentionally uses a
-// short bounded startup pass instead of a document-wide MutationObserver.
+// removed experimental competition layers. Uses bounded/event-driven passes only.
 
 const VISUALS={
   home:'/9B68D5FF-8CCE-40FA-8F35-7F5828913002.png',
@@ -11,6 +10,40 @@ const VISUALS={
   how:'/E9CA092A-116F-4D8E-AE7E-C13A43D52E41.png'
 }
 
+const ALTS={
+  play:'ParFolio Mini GPS golf play',
+  wallet:'ParFolio Mini player profile, Nimiq wallet and signed-round identity',
+  rounds:'ParFolio Mini signed golf rounds',
+  clubs:'ParFolio Mini golf bag and club distances',
+  how:'How ParFolio Mini works'
+}
+
+function ensurePageVisual(page,src){
+  const section=document.querySelector(`.pf-app-page[data-page="${page}"]`)
+  if(!section)return
+
+  let visual=section.querySelector('.pf-page-visual')
+  let img=visual?.querySelector('img')
+
+  if(!visual){
+    visual=document.createElement('div')
+    visual.className='pf-page-visual pf-restored-visual'
+    const title=section.querySelector('.pf-page-title')
+    if(title) section.insertBefore(visual,title)
+    else section.prepend(visual)
+  }
+
+  if(!img){
+    img=document.createElement('img')
+    visual.appendChild(img)
+  }
+
+  if(img.getAttribute('src')!==src)img.src=src
+  img.alt=ALTS[page]||'ParFolio Mini'
+  img.loading='eager'
+  img.decoding='async'
+}
+
 function restoreVisuals(){
   const hero=document.querySelector('.pf-hero-art')
   if(hero&&hero.getAttribute('src')!==VISUALS.home){
@@ -19,13 +52,7 @@ function restoreVisuals(){
   }
 
   Object.entries(VISUALS).forEach(([page,src])=>{
-    if(page==='home')return
-    const img=document.querySelector(`.pf-app-page[data-page="${page}"] .pf-page-visual img`)
-    if(img&&img.getAttribute('src')!==src){
-      img.src=src
-      img.loading='eager'
-      img.decoding='async'
-    }
+    if(page!=='home')ensurePageVisual(page,src)
   })
 }
 
@@ -37,5 +64,7 @@ const timer=setInterval(()=>{
 },150)
 
 window.addEventListener('hashchange',()=>setTimeout(restoreVisuals,20))
+window.addEventListener('parfolio:auth-updated',()=>setTimeout(restoreVisuals,20))
+window.addEventListener('parfolio:profile-updated',()=>setTimeout(restoreVisuals,20))
 document.addEventListener('click',()=>setTimeout(restoreVisuals,40),true)
 restoreVisuals()
