@@ -1,5 +1,5 @@
-// Restore the original premium ParFolio Mini artwork without reintroducing
-// removed experimental competition layers. Uses bounded/event-driven passes only.
+// Restore the original premium ParFolio Mini artwork and keep core navigation complete.
+// Uses bounded/event-driven passes only; no document-wide MutationObserver.
 
 const VISUALS={
   home:'/9B68D5FF-8CCE-40FA-8F35-7F5828913002.png',
@@ -18,21 +18,30 @@ const ALTS={
   how:'How ParFolio Mini works'
 }
 
+function installRestoreStyles(){
+  if(document.getElementById('pf-visual-restore-style'))return
+  const s=document.createElement('style')
+  s.id='pf-visual-restore-style'
+  s.textContent=`
+    .pf-app-page>.pf-page-visual{display:block!important;visibility:visible!important;opacity:1!important}
+    .pf-app-page>.pf-page-visual img{display:block!important;width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important}
+  `
+  document.head.appendChild(s)
+}
+
 function ensurePageVisual(page,src){
   const section=document.querySelector(`.pf-app-page[data-page="${page}"]`)
   if(!section)return
 
-  let visual=section.querySelector('.pf-page-visual')
-  let img=visual?.querySelector('img')
-
+  let visual=section.querySelector(':scope > .pf-page-visual')
   if(!visual){
     visual=document.createElement('div')
     visual.className='pf-page-visual pf-restored-visual'
-    const title=section.querySelector('.pf-page-title')
-    if(title) section.insertBefore(visual,title)
-    else section.prepend(visual)
+    const first=section.firstElementChild
+    section.insertBefore(visual,first||null)
   }
 
+  let img=visual.querySelector('img')
   if(!img){
     img=document.createElement('img')
     visual.appendChild(img)
@@ -44,7 +53,34 @@ function ensurePageVisual(page,src){
   img.decoding='async'
 }
 
+function ensureCoreNav(){
+  const drawer=document.querySelector('.pf-drawer')
+  if(!drawer)return
+  const group=drawer.querySelector('.pf-nav-group')
+  if(!group)return
+
+  const how=drawer.querySelector('.pf-nav-item[data-page="how"]')
+  if(!drawer.querySelector('.pf-nav-item[data-page="rounds"]')){
+    const b=document.createElement('button')
+    b.className='pf-nav-item'
+    b.type='button'
+    b.dataset.page='rounds'
+    b.innerHTML='<i>≡</i>My Rounds'
+    group.insertBefore(b,how||null)
+  }
+  if(!drawer.querySelector('.pf-nav-item[data-page="clubs"]')){
+    const b=document.createElement('button')
+    b.className='pf-nav-item'
+    b.type='button'
+    b.dataset.page='clubs'
+    b.innerHTML='<i>♢</i>My Clubs'
+    group.insertBefore(b,how||null)
+  }
+}
+
 function restoreVisuals(){
+  installRestoreStyles()
+
   const hero=document.querySelector('.pf-hero-art')
   if(hero&&hero.getAttribute('src')!==VISUALS.home){
     hero.src=VISUALS.home
@@ -54,17 +90,21 @@ function restoreVisuals(){
   Object.entries(VISUALS).forEach(([page,src])=>{
     if(page!=='home')ensurePageVisual(page,src)
   })
+
+  ensureCoreNav()
 }
 
 let passes=0
 const timer=setInterval(()=>{
   passes+=1
   restoreVisuals()
-  if(passes>=40)clearInterval(timer)
+  if(passes>=80)clearInterval(timer)
 },150)
 
 window.addEventListener('hashchange',()=>setTimeout(restoreVisuals,20))
 window.addEventListener('parfolio:auth-updated',()=>setTimeout(restoreVisuals,20))
 window.addEventListener('parfolio:profile-updated',()=>setTimeout(restoreVisuals,20))
+window.addEventListener('parfolio:rounds-updated',()=>setTimeout(restoreVisuals,20))
+window.addEventListener('parfolio:clubs-updated',()=>setTimeout(restoreVisuals,20))
 document.addEventListener('click',()=>setTimeout(restoreVisuals,40),true)
 restoreVisuals()
