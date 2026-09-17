@@ -34,9 +34,8 @@ const faqCopy=[
     ['What if the wallet does not connect?','Open ParFolio Mini inside Nimiq Pay, retry the connection, and approve the account request. If no prompt appears, close and reopen the Mini App inside Nimiq Pay.'],
     ['What if a course does not start?','Return to Play, confirm that your profile, wallet, and golf bag are ready, then choose another GPS-ready result or retry the course. The app should display a visible error rather than leave a blank screen.']
   ]]
-]
 
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))
 
 function installStyles(){
   if(document.getElementById('pf-deadline-audit-style'))return
@@ -47,20 +46,20 @@ function installStyles(){
 }
 
 function normalizeHome(){
-  const brand=document.querySelector('.pf-floatbrand small');if(brand)brand.textContent='GPS golf · wallet-signed rounds'
+  const brand=document.querySelector('.pf-floatbrand small');if(brand&&brand.textContent!=='GPS golf · wallet-signed rounds')brand.textContent='GPS golf · wallet-signed rounds'
   const intro=document.querySelector('.pf-home-intro');if(intro&&!intro.dataset.auditFixed){intro.dataset.auditFixed='1';intro.innerHTML=`<p class="eyebrow">ParFolio Mini · Competition Edition</p><h2>Play the round. <span>Own the record.</span></h2><p>Choose a GPS-ready California course, use the full-screen ParFolio golf experience, score the round hole by hole, then sign the completed result with your Nimiq wallet.</p><div class="pf-home-cards"><article><b>GPS-ready golf</b><span>Reviewed course geometry, satellite mapping, yardage, planning and on-course controls.</span></article><article><b>Hole-by-hole scoring</b><span>Keep the round moving with a full-screen score experience and live scorecard.</span></article><article><b>Wallet-signed record</b><span>Finish the round, review the total, and explicitly sign the entered result in Nimiq Pay.</span></article></div><div class="pf-demo-hole"><span><strong>Play → Score → Sign</strong><small>The wallet signature identifies the signing wallet; it does not independently certify the golf score.</small></span><span class="pf-demo-pot">✓ SIGNED</span></div>`}
-  const hero=document.querySelector('.hero.pf-visual-hero');if(hero){const img=hero.querySelector('.pf-hero-art');if(img){img.alt='ParFolio Mini GPS golf and wallet-signed round';if(!img.src.endsWith('/parfolio-mini-hero.webp'))img.src='/parfolio-mini-hero.webp'}const buttons=hero.querySelectorAll('.pf-hero-live-actions button');if(buttons[0])buttons[0].textContent='Start a Round →';if(buttons[1])buttons[1].textContent='How It Works';if(buttons[2]){buttons[2].textContent='My ParFolio';buttons[2].dataset.page='wallet'}const cap=hero.querySelector('.pf-hero-caption');if(cap)cap.innerHTML='<strong>Play. Score. Sign.</strong><span>GPS-ready golf · full-screen scoring · Nimiq wallet signature</span>'}
+  const hero=document.querySelector('.hero.pf-visual-hero');if(hero){const img=hero.querySelector('.pf-hero-art');if(img){img.alt='ParFolio Mini GPS golf and wallet-signed round';if(!img.src.endsWith('/parfolio-mini-hero.webp'))img.src='/parfolio-mini-hero.webp'}const buttons=hero.querySelectorAll('.pf-hero-live-actions button');if(buttons[0]&&buttons[0].textContent!=='Start a Round →')buttons[0].textContent='Start a Round →';if(buttons[1]&&buttons[1].textContent!=='How It Works')buttons[1].textContent='How It Works';if(buttons[2]){if(buttons[2].textContent!=='My ParFolio')buttons[2].textContent='My ParFolio';buttons[2].dataset.page='wallet'}const cap=hero.querySelector('.pf-hero-caption');const wanted='<strong>Play. Score. Sign.</strong><span>GPS-ready golf · full-screen scoring · Nimiq wallet signature</span>';if(cap&&cap.innerHTML!==wanted)cap.innerHTML=wanted}
 }
 
 function normalizePlay(){
-  const path=document.querySelector('.pf-play-path');if(path){const b=path.querySelector('b');const t=path.querySelector('span');if(b)b.textContent='One clean path to the first tee';if(t)t.textContent='Choose a GPS-ready course. ParFolio checks your player profile, Nimiq wallet and golf bag, then opens the full-screen round.';const pills=[...path.querySelectorAll('.pf-ready-pill')];pills.forEach(p=>{if(/match terms/i.test(p.textContent))p.textContent='4 · Choose course';if(/start round/i.test(p.textContent))p.textContent='5 · Start round'})}
-  const finder=document.querySelector('.ca-course-finder');if(finder){const note=finder.querySelector('.course-finder-note');if(note)note.innerHTML='Type a course, city, or ZIP, then tap <b>Search</b>. Choose a GPS-ready result to start the round.'}
+  const path=document.querySelector('.pf-play-path');if(path){const b=path.querySelector('b');const t=path.querySelector('span');if(b&&b.textContent!=='One clean path to the first tee')b.textContent='One clean path to the first tee';if(t&&t.textContent!=='Choose a GPS-ready course. ParFolio checks your player profile, Nimiq wallet and golf bag, then opens the full-screen round.')t.textContent='Choose a GPS-ready course. ParFolio checks your player profile, Nimiq wallet and golf bag, then opens the full-screen round.';const pills=[...path.querySelectorAll('.pf-ready-pill')];pills.forEach(p=>{if(/match terms/i.test(p.textContent))p.textContent='4 · Choose course';if(/start round/i.test(p.textContent))p.textContent='5 · Start round'})}
+  const finder=document.querySelector('.ca-course-finder');if(finder){const note=finder.querySelector('.course-finder-note');if(note){const wanted='Type a course, city, or ZIP, then tap <b>Search</b>. Choose a GPS-ready result to start the round.';if(note.innerHTML!==wanted)note.innerHTML=wanted}}
 }
 
 function normalizeMy(){
-  document.querySelectorAll('[data-scroll-wallet]').forEach(b=>{const span=b.querySelector('span');if(span)span.textContent='◈';b.lastChild&&(b.lastChild.textContent=' Wallet')})
-  const sub=document.querySelector('.pf-wallet-subhead');if(sub)sub.innerHTML='<p class="eyebrow">Nimiq wallet</p><h2>Connect and sign your finished round.</h2><p>The wallet is the identity/signature layer for the competition build. Private keys remain in Nimiq Pay.</p>'
-  const title=document.querySelector('.pf-app-page[data-page="wallet"] .pf-page-title p:last-child');if(title)title.textContent='Keep your player details, Nimiq wallet, clubs and signed rounds together. Your wallet signs the completed round you choose to save.'
+  document.querySelectorAll('[data-scroll-wallet]').forEach(b=>{const span=b.querySelector('span');if(span&&span.textContent!=='◈')span.textContent='◈';if(b.lastChild&&b.lastChild.textContent!==' Wallet')b.lastChild.textContent=' Wallet'})
+  const sub=document.querySelector('.pf-wallet-subhead');if(sub&&!sub.dataset.auditFixed){sub.dataset.auditFixed='1';sub.innerHTML='<p class="eyebrow">Nimiq wallet</p><h2>Connect and sign your finished round.</h2><p>The wallet is the identity/signature layer for the competition build. Private keys remain in Nimiq Pay.</p>'}
+  const title=document.querySelector('.pf-app-page[data-page="wallet"] .pf-page-title p:last-child');const wanted='Keep your player details, Nimiq wallet, clubs and signed rounds together. Your wallet signs the completed round you choose to save.';if(title&&title.textContent!==wanted)title.textContent=wanted
 }
 
 function normalizeAuth(){
@@ -86,10 +85,14 @@ function removeStaleCompetitionUI(){
 function normalizeTitle(){const n=location.hash.replace('#/','')||'home';const t={home:'Play. Score. Sign.',play:'Play',wallet:'My ParFolio',rounds:'My Rounds',clubs:'My Clubs',how:'How It Works',faq:'FAQ'}[n]||'Play. Score. Sign.';const wanted=`ParFolio Mini · ${t}`;if(document.title!==wanted)document.title=wanted}
 
 function run(){installStyles();removeStaleCompetitionUI();normalizeHome();normalizePlay();normalizeMy();normalizeAuth();normalizeFaq();normalizeTitle()}
-let passes=0;const timer=setInterval(()=>{passes++;run();if(passes>=120)clearInterval(timer)},125)
-new MutationObserver(()=>queueMicrotask(run)).observe(document.documentElement,{childList:true,subtree:true})
+
+// IMPORTANT: no document-wide MutationObserver here. Earlier builds crashed on
+// mobile because DOM normalization rewrites recursively triggered the observer.
+// A short bounded startup pass plus explicit app events is enough.
+let passes=0;const timer=setInterval(()=>{passes++;run();if(passes>=48)clearInterval(timer)},125)
 document.addEventListener('click',()=>setTimeout(run,20),true)
 window.addEventListener('hashchange',()=>setTimeout(run,0))
 window.addEventListener('parfolio:wallet-updated',()=>setTimeout(run,0))
 window.addEventListener('parfolio:profile-updated',()=>setTimeout(run,0))
+window.addEventListener('parfolio:auth-updated',()=>setTimeout(run,0))
 run()
