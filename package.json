@@ -9,7 +9,8 @@
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
-    "@nimiq/mini-app-sdk": "latest"
+    "@nimiq/mini-app-sdk": "latest",
+    "@supabase/supabase-js": "latest"
   },
   "devDependencies": {
     "vite": "latest"
