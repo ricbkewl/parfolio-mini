@@ -34,8 +34,9 @@ const faqCopy=[
     ['What if the wallet does not connect?','Open ParFolio Mini inside Nimiq Pay, retry the connection, and approve the account request. If no prompt appears, close and reopen the Mini App inside Nimiq Pay.'],
     ['What if a course does not start?','Return to Play, confirm that your profile, wallet, and golf bag are ready, then choose another GPS-ready result or retry the course. The app should display a visible error rather than leave a blank screen.']
   ]]
+]
 
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
 
 function installStyles(){
   if(document.getElementById('pf-deadline-audit-style'))return
