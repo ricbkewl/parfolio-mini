@@ -18,7 +18,7 @@ function ensureHeroStyles(){
     .pf-hero-live-actions button:hover{transform:translateY(-1px);filter:brightness(1.04)}
     .pf-hero-caption{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 16px 13px;background:#061c15;color:#aebeb6;font-size:.72rem}
     .pf-hero-caption strong{color:#f0d276;font-size:.74rem;letter-spacing:.04em;text-transform:uppercase}
-    .pf-hero-caption span:last-child{text-align:right}
+    .pf-hero-caption span:last-child{text-align:right}\n    .pf-nimiq-explainer{padding:15px 16px 17px;background:linear-gradient(180deg,#071f17,#051913);border-top:1px solid rgba(239,210,118,.14)}\n    .pf-nimiq-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:11px}.pf-nimiq-flow span{padding:8px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:#f0d276;text-align:center;font-size:.69rem;font-weight:850}.pf-nimiq-explainer p{margin:0;color:#b7c5be;font-size:.73rem;line-height:1.45}.pf-nimiq-explainer b{color:#fff}.pf-nimiq-note{display:block;margin-top:7px;color:#91a69c;font-size:.65rem}
     .hero.pf-visual-hero .hero-copy,.hero.pf-visual-hero .hero-visual{display:none!important}
     @media(max-width:720px){
       .hero.pf-visual-hero{width:100%;border-radius:22px!important;margin:0!important}
@@ -27,7 +27,7 @@ function ensureHeroStyles(){
       .pf-hero-live-actions button{min-height:47px;font-size:.82rem}
       .pf-hero-live-actions button:first-child{grid-column:1/-1}
       .pf-hero-caption{padding:8px 11px 11px;font-size:.64rem;align-items:flex-start}
-      .pf-hero-caption span:last-child{max-width:58%;text-align:right}
+      .pf-hero-caption span:last-child{max-width:58%;text-align:right}\n      .pf-nimiq-explainer{padding:12px 11px 14px}.pf-nimiq-flow{grid-template-columns:1fr 1fr}.pf-nimiq-flow span{font-size:.66rem}.pf-nimiq-explainer p{font-size:.69rem}
     }
   `
   document.head.appendChild(style)
