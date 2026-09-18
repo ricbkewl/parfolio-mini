@@ -25,6 +25,13 @@ jobs:
       - run: npm install
       - run: npm run check
       - run: npm run build -- --base=/parfolio-mini/
+      - name: Verify built public assets
+        run: |
+          test -f dist/9B68D5FF-8CCE-40FA-8F35-7F5828913002.png
+          test -f dist/parfolio-mini-logo-v2.png
+          test -f dist/golf-horizon.svg
+          test -f dist/apple-touch-icon.png
+          test -f dist/parfolio-mini.webmanifest
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
