@@ -1,7 +1,7 @@
 // ParFolio Mini landing-page visual upgrade.
 // Lightweight competition hero with a direct Play → Score → Sign message.
 
-const HOME_ART='/parfolio-mini/9B68D5FF-8CCE-40FA-8F35-7F5828913002.png'
+const HOME_ART='./9B68D5FF-8CCE-40FA-8F35-7F5828913002.png'
 
 function ensureHeroStyles(){
   if(document.getElementById('pf-mini-landing-hero-v2'))return
