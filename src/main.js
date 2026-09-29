@@ -7,6 +7,7 @@ const app = document.querySelector('#app')
 const state = {
   provider: null,
   account: null,
+  connectionVerified: false,
   networkReady: null,
   blockNumber: null,
   verifiedRounds: loadRounds(),
@@ -68,7 +69,7 @@ function shareableRecord(item) {
 }
 
 function render() {
-  const connected = Boolean(state.account)
+  const connected = Boolean(state.account && state.connectionVerified)
   const records = state.verifiedRounds.map((item, index) => `
     <article class="record-card">
       <div class="credential-top">
@@ -331,6 +332,8 @@ async function connectWallet() {
     )
     if (!accounts?.length) throw new Error('Nimiq Pay returned no account. Please choose a wallet and try again.')
     state.account = accounts[0]
+    state.connectionVerified = true
+    window.dispatchEvent(new CustomEvent('parfolio:wallet-updated',{detail:{account:state.account,verified:true}}))
     render()
 
     // Network diagnostics are optional and must never hold the connected UI open.
@@ -351,8 +354,8 @@ async function connectWallet() {
 async function verifyRound(form) {
   const message = document.querySelector('#formMessage')
   const submit = form.querySelector('button[type="submit"]')
-  if (!state.account) {
-    message.textContent = 'Connect your Nimiq wallet first.'
+  if (!state.account || !state.connectionVerified) {
+    message.textContent = 'Connect and verify your Nimiq Pay wallet first.'
     return
   }
 
