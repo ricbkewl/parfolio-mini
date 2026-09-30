@@ -294,19 +294,40 @@ function withTimeout(promise, milliseconds, timeoutMessage) {
 
 async function getProvider() {
   if (state.provider) return state.provider
-  state.provider = await withTimeout(
-    init(),
-    8000,
-    'Nimiq Pay did not provide a wallet connection. Close Mini and open it again inside Nimiq Pay.',
-  )
-  return state.provider
+  try {
+    state.provider = await withTimeout(
+      init(),
+      12000,
+      'Nimiq Pay did not provide the Mini App wallet bridge yet. Keep ParFolio Mini open in Nimiq Pay and tap Connect wallet again.',
+    )
+    return state.provider
+  } catch (error) {
+    // Never cache a failed SDK initialization. A mobile WebView can inject the
+    // provider shortly after page load, so the next tap must be allowed to retry.
+    state.provider = null
+    throw error
+  }
+}
+
+async function waitForNimiqPay(milliseconds = 1800) {
+  if (window.nimiqPay) return true
+  const started = Date.now()
+  while (Date.now() - started < milliseconds) {
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    if (window.nimiqPay) return true
+  }
+  return false
 }
 
 async function connectWallet() {
   const button = document.querySelector('#connectWallet')
   const message = document.querySelector('#walletMessage')
-  if (!window.nimiqPay) {
-    message.textContent = 'Open Nimiq Pay on your phone → Mini Apps → Custom URL → enter https://parfolio-mini.vercel.app. The directory link is unavailable until the app is listed.'
+  // Nimiq Pay can inject its Mini App bridge just after the page becomes
+  // interactive. Give it a brief chance before showing recovery instructions.
+  if (!window.nimiqPay && !(await waitForNimiqPay())) {
+    button.disabled = false
+    button.textContent = 'Connect wallet'
+    message.textContent = 'Wallet connection works inside Nimiq Pay. Open Nimiq Pay → Mini Apps → ParFolio Mini (or Custom URL: parfolio-mini.vercel.app), then tap Connect wallet here.'
     return
   }
   if (state.account) {
